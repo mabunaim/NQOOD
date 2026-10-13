@@ -7,19 +7,20 @@ const all = selector => [...document.querySelectorAll(selector)];
 const testMode = location.pathname.endsWith('/fixtures/t08.html');
 const basePath = new URL('./', document.baseURI).pathname;
 const dbName = `${testMode ? 'masareek_spike_t08' : 'masareek_spike_db'}:${basePath}`;
+let editingCategoryId = '', categoryInitial = '', categoryAction = null;
 let repository, offline, offlineError = '', data = {categories: [], records: []};
 let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, initial = '', pendingAction = null, busy = false;
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date', 'inline-name'].map(id => $(id).value));
-const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : false;
-const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && !$('category-dialog').open;
+const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : page === 'category-edit' ? $('category-edit-name').value !== categoryInitial : false;
+const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && !$('category-dialog').open && !$('category-action-dialog').open;
 function notify(text) { $('message').textContent = text; $('message').hidden = false; }
-function setBusy(value) { busy = value; $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; }
+function setBusy(value) { busy = value; $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
 function setError(id, error) { $(id).textContent = friendlyError(error); $(id).hidden = false; }
 function show(next) {
   page = next;
-  for (const p of ['home', 'entry', 'categories', 'diagnostics']) $(p + '-page').hidden = p !== next;
-  $('navigation').hidden = next === 'entry'; $('message').hidden = true;
+  for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics']) $(p + '-page').hidden = p !== next;
+  $('navigation').hidden = next === 'entry' || next === 'category-edit'; $('message').hidden = true;
   all('[data-page]').forEach(b => { if (b.dataset.page === next) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (next === 'home') renderHome();
   if (next === 'categories') renderCategories();
@@ -33,6 +34,7 @@ function guard(action) {
 function clearDraft() {
   if (page === 'entry') { $('entry-form').reset(); $('inline-name').value = ''; }
   if (page === 'categories') $('category-name').value = '';
+  if (page === 'category-edit') $('category-edit-name').value = categoryInitial;
 }
 function monthOptions() {
   const selected = $('month').value || todayISO().slice(0, 7);
@@ -122,7 +124,49 @@ function renderCategories() {
   $('category-list').replaceChildren();
   const rows = data.categories.filter(c => c.type === categoryType).sort((a,b) => a.name.localeCompare(b.name, 'ar'));
   if (!rows.length) $('category-list').append(e('p', 'empty', 'ما في تصنيفات بعد.'));
-  for (const c of rows) $('category-list').append(e('div', '', c.name));
+  for (const c of rows) {
+    const button = e('button', 'category-manage'); button.type = 'button';
+    button.append(e('span', '', c.name), e('span', c.active ? 'status-active small' : 'muted small', c.active ? 'فعّال' : 'معطّل'));
+    button.onclick = () => guard(() => openCategoryEditor(c.id)); $('category-list').append(button);
+  }
+}
+function openCategoryEditor(id) {
+  const c = data.categories.find(c => c.id === id); if (!c) return;
+  editingCategoryId = id; categoryInitial = c.name; $('category-edit-name').value = c.name; $('category-edit-error').hidden = true;
+  const count = data.records.filter(r => r.categoryId === id).length;
+  $('category-edit-meta').textContent = `${c.type === 'income' ? 'إيراد' : 'مصروف'} · ${c.active ? 'فعّال' : 'معطّل'} · ${count} حركات مرتبطة`;
+  $('category-toggle').textContent = c.active ? 'تعطيل التصنيف' : 'إعادة تفعيل التصنيف';
+  $('category-delete').hidden = count > 0;
+  $('category-delete-help').textContent = count ? 'هذا التصنيف مستخدم؛ يمكن تعطيله مع الاحتفاظ بحركاته السابقة.' : 'يمكن حذف التصنيف لأنه غير مرتبط بأي حركة.';
+  show('category-edit');
+}
+async function saveCategoryEditor() {
+  if (busy) return false;
+  $('category-edit-error').hidden = true; setBusy(true);
+  try {
+    const saved = await repository.updateCategory(editingCategoryId, {name: $('category-edit-name').value});
+    data.categories = data.categories.map(c => c.id === saved.id ? saved : c);
+    categoryInitial = saved.name; $('category-edit-name').value = saved.name;
+    return true;
+  } catch (error) { setError('category-edit-error', error); return false; }
+  finally { setBusy(false); }
+}
+function confirmCategoryAction(kind) {
+  const c = data.categories.find(c => c.id === editingCategoryId); if (!c) return;
+  categoryAction = {id: c.id, kind, active: !c.active};
+  $('category-action-title').textContent = kind === 'delete' ? 'حذف التصنيف؟' : c.active ? 'تعطيل التصنيف؟' : 'إعادة تفعيل التصنيف؟';
+  $('category-action-text').textContent = kind === 'delete' ? `سيُحذف «${c.name}» بعد التأكد من عدم ارتباطه بأي حركة.` : c.active ? `سيختفي «${c.name}» من اختيار الحركات الجديدة، وتبقى حركاته السابقة محفوظة.` : `سيعود «${c.name}» للاختيار في الحركات الجديدة بنفس ارتباطاته السابقة.`;
+  $('category-action-dialog').showModal();
+}
+async function applyCategoryAction() {
+  if (busy || !categoryAction) return;
+  const action = categoryAction; categoryAction = null; $('category-action-dialog').close(); setBusy(true);
+  try {
+    if (action.kind === 'delete') await repository.deleteCategory(action.id);
+    else await repository.updateCategory(action.id, {active: action.active});
+    data = await repository.readAll(); show('categories'); notify(action.kind === 'delete' ? 'تم حذف التصنيف.' : action.active ? 'تمت إعادة تفعيل التصنيف.' : 'تم تعطيل التصنيف؛ الحركات السابقة محفوظة.');
+  } catch (error) { setError('category-edit-error', error); }
+  finally { setBusy(false); }
 }
 async function saveCategory(inline = false) {
   if (busy) return false;
@@ -158,6 +202,13 @@ $('category-dialog').addEventListener('click', event => { if (event.target !== $
 $('category-create').onclick = () => { $('category-dialog').close(); $('inline-box').hidden = false; $('inline-name').focus(); };
 $('close-entry').onclick = () => guard(() => show('home'));
 $('entry-form').onsubmit = async event => { event.preventDefault(); if (await saveEntry()) { show('home'); savedMessage(); } };
+$('category-edit-close').onclick = () => guard(() => show('categories'));
+$('category-edit-form').onsubmit = async event => { event.preventDefault(); if (await saveCategoryEditor()) { show('categories'); notify('تم تعديل اسم التصنيف.'); } };
+$('category-toggle').onclick = () => guard(() => confirmCategoryAction('toggle'));
+$('category-delete').onclick = () => guard(() => confirmCategoryAction('delete'));
+$('category-action-confirm').onclick = applyCategoryAction;
+$('category-action-cancel').onclick = () => { categoryAction = null; $('category-action-dialog').close(); };
+$('category-action-dialog').addEventListener('cancel', () => { categoryAction = null; });
 $('category-form').onsubmit = async event => { event.preventDefault(); if (await saveCategory()) notify('تم حفظ التصنيف.'); };
 $('inline-add').onclick = () => { $('inline-box').hidden = false; $('inline-name').focus(); };
 $('inline-cancel').onclick = () => { $('inline-box').hidden = true; $('inline-name').value = ''; $('inline-error').hidden = true; };
@@ -171,7 +222,7 @@ $('discard').onclick = () => { const action = pendingAction; pendingAction = nul
 $('save-leave').onclick = async () => {
   const action = pendingAction; pendingAction = null; $('leave-dialog').close();
   const wasEntry = page === 'entry';
-  if (await (wasEntry ? saveEntry() : saveCategory())) { action?.(); if (wasEntry) savedMessage(); }
+  if (await (wasEntry ? saveEntry() : page === 'category-edit' ? saveCategoryEditor() : saveCategory())) { action?.(); if (wasEntry) savedMessage(); }
 };
 $('refresh-diagnostics').onclick = async () => { try { data = await repository.readAll(); await updateDiagnostics(); } catch (error) { notify(friendlyError(error)); } };
 $('check-update').onclick = async () => { try { if (!offline) throw new Error(offlineError || 'التجهيز لم يكتمل بعد.'); await offline.check(); notify('اكتمل طلب التحقق. سيظهر إشعار إذا توفر تحديث.'); } catch (error) { notify(friendlyError(error)); } };

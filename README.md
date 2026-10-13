@@ -1,17 +1,10 @@
 # مصاريك — NQOOD
 
-Personal expense PWA · SPK-001 technical spike · B1.1
+Personal expense PWA. Current build: **B3 — Category maintenance**.
 
-Repository: https://github.com/mabunaim/NQOOD
+Application: https://mabunaim.github.io/NQOOD/
 
-This is the first technical verification build, not the complete product. Use fictional test data until physical iPhone verification and backup implementation are complete.
-
-## GitHub Pages setup
-
-In this repository: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: main → Folder: /docs → Save**.
-
-Expected URL after GitHub successfully deploys: https://mabunaim.github.io/NQOOD/
-The URL is not considered live until the Pages deployment succeeds.
+This is an incremental test build, not the complete product. Use fictional test data while backup/restore and full acceptance testing remain pending.
 
 ## Development
 
@@ -26,30 +19,25 @@ npm run test:browser
 npm run serve
 ```
 
-To refresh the B1.1 files in the Pages publishing folder:
+## Deployment
+
+GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs B1.1
+node tools/stage-pages.mjs B3
 ```
 
-Only when the B1 device tests reach SPK-T06, stage B2 and commit the changed docs files:
+Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
 
-```sh
-node tools/stage-pages.mjs B2
-```
+## Current scope
 
-Keep the same Pages URL and device storage for the B1→B2 test. Do not launch dist-b2 as a separate site; that would use a different scoped database.
+Income and expense entry, monthly totals, searchable categories, category creation and maintenance, offline storage and controlled updates. Category maintenance preserves linked records when renaming, disabling or reactivating a category. Used categories cannot be deleted.
 
-## Guides and evidence
+20 Node tests and 10 Chromium browser tests passed. Physical-device category UAT is pending. Record editing, reports and backup/restore are still pending.
 
-- [Arabic start guide](README_AR.md)
-- [English technical guide](README_EN.md)
-- [Test execution and pending iPhone tests](docs/TEST_EXECUTION.md)
-- [Decisions and next steps](docs/DECISIONS_AND_NEXT_STEPS.md)
+- [B3 release notes and UAT cases](docs/RELEASE_B3.md)
+- [B1.1 release notes](docs/RELEASE_B1_1.md)
+- [Original Arabic guide](README_AR.md)
+- [Original English guide](README_EN.md)
 
-18 Node tests and 6 Chromium tests passed locally. Physical iPhone/Safari tests and UAT are pending. Categories can be created; disabling/reactivating categories, record maintenance, reports and backup/restore remain in the full-product backlog.
-
-The October 12 packaged guides retain their pre-upload status. This repository now contains the source and B1 deployment files; enabling Pages and verifying the live deployment are the next steps. No financial transactions or account credentials are included.
-
-## B1.1 — 2026-10-13
-Searchable category sheet approved by Mahmoud. 8 Chromium browser tests passed, including B1 → B1.1 preservation. See [release note](docs/RELEASE_B1_1.md). The original B1 files remain in dist-b1 for update regression testing.
+Older guides describe the initial technical spike and may reference historical builds.

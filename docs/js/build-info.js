@@ -1,2 +1,2 @@
-export const BUILD = 'B2';
-export const BUILD_NOTE = 'نسخة التحديث — البيانات محفوظة';
+export const BUILD = 'B3';
+export const BUILD_NOTE = 'إدارة التصنيفات';

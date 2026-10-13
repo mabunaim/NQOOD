@@ -52,6 +52,35 @@ export function createRepository(db, {testMode = false} = {}) {
       if (!id) throw new Error('معرّف التصنيف غير صالح.');
       return atomic(db, ['categories'], 'readwrite', (tx, done) => { tx.objectStore('categories').add(record); done(record); });
     },
+    async updateCategory(id, patch) {
+      if (!id || !patch || Object.keys(patch).some(k => !['name', 'active'].includes(k))) throw new Error('لا يمكن تغيير نوع التصنيف أو معرّفه.');
+      const change = {...patch};
+      if ('name' in change) change.name = categoryName(change.name);
+      if ('active' in change && typeof change.active !== 'boolean') throw new Error('حالة التصنيف غير صالحة.');
+      return atomic(db, ['categories'], 'readwrite', (tx, done, abort) => {
+        const store = tx.objectStore('categories'), request = store.get(id);
+        request.onsuccess = () => {
+          if (!request.result) { abort(new Error('التصنيف غير موجود.')); return; }
+          const saved = {...request.result, ...change, updatedAt: new Date().toISOString()};
+          saved.nameKey = saved.name; store.put(saved); done(saved);
+        };
+      });
+    },
+    async deleteCategory(id) {
+      return atomic(db, ['categories', 'transactions'], 'readwrite', (tx, done, abort) => {
+        const categories = tx.objectStore('categories'), request = categories.get(id);
+        request.onsuccess = () => {
+          if (!request.result) { abort(new Error('التصنيف غير موجود.')); return; }
+          const cursor = tx.objectStore('transactions').openCursor();
+          cursor.onsuccess = () => {
+            const row = cursor.result;
+            if (!row) { categories.delete(id); done(id); return; }
+            if (row.value.categoryId === id) { abort(new Error('التصنيف مرتبط بحركات؛ يمكنك تعطيله بدل الحذف.')); return; }
+            row.continue();
+          };
+        };
+      });
+    },
     async addRecord(record) {
       validateRecord(record);
       return atomic(db, ['categories', 'transactions'], 'readwrite', (tx, done, abort) => {
