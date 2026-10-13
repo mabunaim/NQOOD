@@ -26,3 +26,13 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .category-sheet[open]{gap:8px}.category-results{min-height:0;max-height:32dvh}.category-choice{min-height:46px;padding:9px 10px}
 dialog{max-height:calc(var(--app-height,100dvh) - 24px);overflow-y:auto}
 @media(max-height:500px){#app>.brand-row,#app>.notice{display:none}#app{padding-top:6px}#navigation{padding-block:4px}#navigation button{min-height:44px}.category-sheet{padding-bottom:8px}}
+
+.category-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.category-chip{min-height:44px;padding:8px 10px;text-align:center;overflow-wrap:anywhere;font-size:15px}
+.category-chip[aria-pressed="true"]{border-color:var(--ok);background:var(--wash);color:var(--ok);font-weight:600}
+.category-chip[aria-pressed="true"]::before{content:'✓ ';}
+.category-inline{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px;background:var(--wash)}
+.category-inline .section-heading{margin:0 0 6px}.category-inline h2{font-size:14px}.category-inline .ghost{padding:4px 8px;min-height:44px}
+.category-inline label{font-size:12px}.category-inline input{min-height:44px;padding:8px 10px}
+.category-inline .category-results{max-height:192px;min-height:0;margin-top:6px}
+.category-inline .category-choice{min-height:48px;background:var(--bg)}
