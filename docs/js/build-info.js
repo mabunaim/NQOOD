@@ -1,2 +1,2 @@
-export const BUILD = 'B9';
-export const BUILD_NOTE = 'إدخال أوسع وسحب أدق';
+export const BUILD = 'B10';
+export const BUILD_NOTE = 'ملخص الشهر والمزيد';

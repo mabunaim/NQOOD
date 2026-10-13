@@ -55,3 +55,12 @@ export function daysLabel(month, now = new Date()) {
   const count = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
   return count === 0 ? 'آخر يوم بالشهر' : `باقي ${count} يوم`;
 }
+export function categorySummary(records, categories, month, type) {
+  const groups = new Map(); let total = 0n;
+  for (const r of records) if (r.date.slice(0,7) === month && r.type === type) {
+    const amount = BigInt(r.amountFils); total += amount;
+    const group = groups.get(r.categoryId) || {id:r.categoryId, amount:0n, count:0};
+    group.amount += amount; group.count++; groups.set(r.categoryId, group);
+  }
+  return [...groups.values()].map(group => ({...group, name:categories.find(c=>c.id===group.id)?.name || 'تصنيف غير متاح', percent:total ? Number((group.amount*1000n+total/2n)/total)/10 : 0})).sort((a,b)=>a.amount===b.amount?a.name.localeCompare(b.name,'ar'):a.amount>b.amount?-1:1);
+}

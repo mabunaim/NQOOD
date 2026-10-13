@@ -1,4 +1,4 @@
-import {parseMoney, formatMoney, todayISO, displayDate, parseDate, monthlyTotals, daysLabel, normalizeDigits} from './domain.js';
+import {parseMoney, formatMoney, todayISO, displayDate, parseDate, monthlyTotals, daysLabel, normalizeDigits, categorySummary} from './domain.js';
 import {openDatabase, createRepository, friendlyError, DB_VERSION} from './db.js';
 import {BUILD, BUILD_NOTE} from './build-info.js';
 import {setupOffline} from './offline.js';
@@ -21,10 +21,12 @@ function setError(id, error) { $(id).textContent = friendlyError(error); $(id).h
 function show(next) {
   if (resetOnReturn) next = 'home';
   page = next; closeCombo();
-  for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics']) $(p + '-page').hidden = p !== next;
+  for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics', 'summary', 'summary-detail', 'more', 'definitions']) $(p + '-page').hidden = p !== next;
   $('navigation').hidden = next === 'entry'; $('page-content').scrollTop = 0; $('message').hidden = true;
-  all('[data-page]').forEach(b => { if (b.dataset.page === next) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  const activeTab = ['categories','category-edit','definitions','diagnostics'].includes(next) ? 'more' : next === 'summary-detail' ? 'summary' : next;
+  all('#navigation [data-page]').forEach(b => { if (b.dataset.page === activeTab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (next === 'home') renderHome();
+  if (next === 'summary') renderSummary();
   if (next === 'categories') renderCategories();
   if (next === 'diagnostics') updateDiagnostics();
 }
@@ -123,7 +125,8 @@ function openRecordEditor(id) {
   const record=data.records.find(r=>r.id===id);if(!record)return;
   openEntry(record.type);editingRecord={...record};entryId=record.id;
   $('entry-category').value=record.categoryId;populateCategories();
-  $('entry-amount').value=String(record.amountFils/1000);$('entry-description').value=record.description;$('entry-date').value=displayDate(record.date);
+  $('entry-amount').value=String(record.amountFils/1000);$('entry-description').value=record.description;$('entry-date').value=record.date;
+  $('entry-date').min=record.ym+'-01';const [y,m]=record.ym.split('-').map(Number);const last=new Date(0);last.setUTCFullYear(y,m,0);const end=last.toISOString().slice(0,10);$('entry-date').max=end<todayISO()?end:todayISO();
   $('entry-title').textContent=record.type==='income'?'تعديل الإيراد':'تعديل المصروف';$('save-entry').textContent='حفظ التعديل';
   $('date-help').textContent=`التعديل ضمن شهر ${record.ym} فقط · DD/MM/YYYY`;
   descriptionState();initial=snapshot();
@@ -141,8 +144,8 @@ async function deleteSelectedRecord() {
 }
 function descriptionState() { const filled = $('entry-description').value.trim() !== ''; $('description-state').hidden = !filled; $('entry-description').classList.toggle('filled', filled); }
 function openEntry(type) {
-  editingRecord = null; $('date-help').textContent='DD/MM/YYYY · يوم / شهر / سنة'; entryType = type; entryId = crypto.randomUUID(); $('entry-form').reset(); $('entry-error').hidden = true;
-  $('entry-date').value = displayDate(todayISO()); $('entry-category').value = ''; populateCategories();
+  editingRecord = null; $('date-help').textContent='اختر التاريخ من التقويم'; $('entry-date').min='0001-01-01'; $('entry-date').max=todayISO(); entryType = type; entryId = crypto.randomUUID(); $('entry-form').reset(); $('entry-error').hidden = true;
+  $('entry-date').value = todayISO(); $('entry-category').value = ''; populateCategories();
   $('entry-title').textContent = type === 'expense' ? 'إضافة مصروف' : 'إضافة إيراد'; $('save-entry').textContent = type === 'expense' ? 'حفظ المصروف' : 'حفظ الإيراد';
   $('entry-description').placeholder = type === 'expense' ? 'مثلًا: خضار' : 'مثلًا: راتب الشهر';
   descriptionState(); initial = snapshot(); show('entry'); $('category-toggle-list').focus();
@@ -153,7 +156,7 @@ async function saveEntry() {
   let record;
   try {
     if (!$('entry-category').value) throw new Error('اختر التصنيف قبل الحفظ.');
-    record = {id: entryId, type: entryType, categoryId: $('entry-category').value, amountFils: parseMoney($('entry-amount').value), date: parseDate($('entry-date').value), description: $('entry-description').value.trim()};
+    record = {id: entryId, type: entryType, categoryId: $('entry-category').value, amountFils: parseMoney($('entry-amount').value), date: parseDate(displayDate($('entry-date').value)), description: $('entry-description').value.trim()};
     if (editingRecord && record.date.slice(0,7) !== editingRecord.ym) throw new Error('لا يمكن نقل الحركة إلى شهر آخر.');
     setBusy(true);
     const saved = await (editingRecord ? repository.updateRecord(record) : repository.addRecord(record));
@@ -163,7 +166,7 @@ async function saveEntry() {
   initial = snapshot();
   return true;
 }
-function savedMessage() { notify(`تم حفظ ${entryType === 'income' ? 'الإيراد' : 'المصروف'} في شهر ${$('entry-date').value.slice(3)}.`); }
+function savedMessage() { notify(`تم حفظ ${entryType === 'income' ? 'الإيراد' : 'المصروف'} في شهر ${$('entry-date').value.slice(0,7)}.`); }
 function renderCategories() {
   all('[data-category-type]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.categoryType === categoryType)));
   $('category-list').replaceChildren();
@@ -249,7 +252,7 @@ $('category-action-cancel').onclick = () => { categoryAction = null; $('category
 $('category-action-dialog').addEventListener('cancel', () => { categoryAction = null; });
 $('category-form').onsubmit = async event => { event.preventDefault(); if (await saveCategory()) notify('تم حفظ التصنيف.'); };
 $('entry-description').oninput = descriptionState;
-for (const id of ['entry-amount', 'entry-date']) $(id).addEventListener('input', () => { $(id).value = normalizeDigits($(id).value); });
+for (const id of ['entry-amount']) $(id).addEventListener('input', () => { $(id).value = normalizeDigits($(id).value); });
 $('month').onchange = renderHome;
 $('leave-dialog').addEventListener('cancel', event => { event.preventDefault(); pendingAction = null; $('leave-dialog').close(); });
 $('continue-editing').onclick = () => { pendingAction = null; $('leave-dialog').close(); };
@@ -330,3 +333,41 @@ document.addEventListener('pointerdown',event=>{if(!event.target.closest('#categ
 $('record-delete-confirm').onclick=deleteSelectedRecord;
 $('record-delete-cancel').onclick=()=>{deleteRecordId=null;$('record-delete-dialog').close();};
 $('record-delete-dialog').addEventListener('cancel',event=>{if(busy)event.preventDefault();else deleteRecordId=null;});
+
+all('[data-back]').forEach(button=>button.onclick=()=>guard(()=>show(button.dataset.back)));
+function summaryMonths() {
+  const selected=$('summary-month').value || todayISO().slice(0,7), months=new Set([selected,...data.records.map(r=>r.ym)]);
+  const now=new Date();for(let i=0;i<12;i++){const date=new Date(now.getFullYear(),now.getMonth()-i,1);months.add(todayISO(date).slice(0,7));}
+  $('summary-month').replaceChildren();
+  for(const month of [...months].sort().reverse()){
+    const [year,m]=month.split('-');const names=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    $('summary-month').add(new Option(`${names[Number(m)-1]} ${year}`,month));
+  }
+  $('summary-month').value=selected;
+}
+function renderSummary() {
+  summaryMonths();const month=$('summary-month').value, totals=monthlyTotals(data.records,month);
+  for(const key of ['income','expense','remaining'])$('summary-'+key).textContent=formatMoney(totals[key]);
+  $('summary-remaining').classList.toggle('danger',totals.remaining<0n);
+  for(const type of ['expense','income']){
+    const target=$(type+'-breakdown');target.replaceChildren();const groups=categorySummary(data.records,data.categories,month,type);
+    if(!groups.length){target.append(e('p','empty',type==='expense'?'لا توجد مصروفات لهذا الشهر.':'لا توجد إيرادات لهذا الشهر.'));continue;}
+    for(const group of groups){
+      const button=e('button','breakdown-row');button.type='button';button.dataset.categoryId=group.id;
+      const heading=e('span','breakdown-heading');heading.append(e('span','',group.name),e('bdi','num',formatMoney(group.amount)+' دينار'));
+      const footer=e('span','breakdown-footer');footer.append(e('span','',`${group.count} حركات`),e('bdi','num',`${group.percent}%`));
+      const track=e('span','bar-track'),bar=e('span','bar-fill');bar.style.width=group.percent+'%';track.setAttribute('aria-hidden','true');track.append(bar);
+      button.append(heading,track,footer);button.onclick=()=>openSummaryDetail(group,month,type);target.append(button);
+    }
+  }
+}
+function openSummaryDetail(group,month,type){
+  $('summary-detail-title').textContent=group.name;$('summary-detail-meta').textContent=`${month} · ${formatMoney(group.amount)} دينار · ${group.count} حركات`;
+  const target=$('summary-detail-list');target.replaceChildren();
+  const records=data.records.filter(r=>r.ym===month&&r.type===type&&r.categoryId===group.id).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt.localeCompare(a.createdAt));
+  for(const record of records){const row=e('div','summary-detail-row'),text=e('div');text.append(e('div','',record.description||'بدون وصف'),e('bdi','num small muted',displayDate(record.date)));row.append(text,e('bdi','num',formatMoney(record.amountFils)+' دينار'));target.append(row);}
+  show('summary-detail');
+}
+$('summary-month').onchange=renderSummary;
+
+$('entry-date').addEventListener('click',()=>{try{$('entry-date').showPicker?.();}catch{/* Native picker remains available. */}});

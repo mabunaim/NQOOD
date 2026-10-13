@@ -29,17 +29,26 @@
   <div class="section-heading"><h1 id="entry-title">إضافة مصروف</h1><button id="close-entry" type="button" class="ghost">إغلاق ×</button></div>
   <form id="entry-form" novalidate>
    <fieldset id="entry-fields">
-    <div id="category-combo" class="combo"><label for="category-input">التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><div class="combo-field"><input id="category-input" role="combobox" aria-autocomplete="list" aria-controls="category-options" aria-expanded="false" aria-required="true" autocomplete="off" placeholder="اختر التصنيف أو ابحث…"><button id="category-toggle-list" type="button" aria-label="عرض التصنيفات" aria-controls="category-options" aria-expanded="false">⌄</button></div><div id="category-popup" class="combo-popup" hidden><div id="category-options" role="listbox" aria-label="التصنيفات"></div><p id="category-no-results" class="help" hidden>لا توجد نتائج. إنشاء التصنيفات من التعريفات.</p></div><p id="category-empty" class="help" hidden>أضف تصنيفًا من التعريفات أولًا.</p></div>
+    <div id="category-combo" class="combo"><label for="category-input">التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><div class="combo-field"><input id="category-input" role="combobox" aria-autocomplete="list" aria-controls="category-options" aria-expanded="false" aria-required="true" autocomplete="off" placeholder="اختر التصنيف أو ابحث…"><button id="category-toggle-list" type="button" aria-label="عرض التصنيفات" aria-controls="category-options" aria-expanded="false">⌄</button></div><div id="category-popup" class="combo-popup" hidden><div id="category-options" role="listbox" aria-label="التصنيفات"></div><p id="category-no-results" class="help" hidden>لا توجد نتائج. إنشاء التصنيفات من المزيد ← التعريفات.</p></div><p id="category-empty" class="help" hidden>أضف تصنيفًا من المزيد ← التعريفات ← التصنيفات.</p></div>
     <div><label for="entry-amount">المبلغ <span>دينار أردني · إلزامي</span></label><input id="entry-amount" class="numeric" inputmode="decimal" autocomplete="off" placeholder="0.00" required><p class="help">حتى 3 خانات عشرية</p></div>
     <div><div class="section-heading"><label for="entry-description">الوصف <span>اختياري</span></label><span id="description-state" class="complete small" hidden>✓ مُعبّأ</span></div><textarea id="entry-description" maxlength="500" rows="2" placeholder="مثلًا: خضار"></textarea></div>
-    <div><label for="entry-date">تاريخ الحركة <span>إلزامي</span></label><input id="entry-date" class="numeric" inputmode="numeric" autocomplete="off" required aria-describedby="date-help"><p id="date-help" class="help">DD/MM/YYYY · يوم / شهر / سنة</p></div>
+    <div><label for="entry-date">تاريخ الحركة <span>إلزامي</span></label><input id="entry-date" type="date" lang="en-GB" class="numeric" autocomplete="off" required aria-describedby="date-help"><p id="date-help" class="help">اختر التاريخ من التقويم</p></div>
     <p id="entry-error" class="error" role="alert" hidden></p>
     <button id="save-entry" class="primary full" type="submit">حفظ المصروف</button>
    </fieldset>
   </form>
  </section>
+ <section id="summary-page" hidden>
+  <h1>ملخص الشهر</h1><div class="month-row"><label for="summary-month">الشهر</label><select id="summary-month"></select></div>
+  <div class="summary-totals"><div><span class="small muted">الإيرادات</span><bdi id="summary-income" class="num value">0</bdi></div><div><span class="small muted">المصروفات</span><bdi id="summary-expense" class="num value">0</bdi></div><div><span class="small muted">المتبقي</span><bdi id="summary-remaining" class="num value">0</bdi></div></div>
+  <div class="section-heading"><h2>وين صرفت مصاريك؟</h2></div><p class="help">اضغط التصنيف لعرض حركاته. النسبة من إجمالي المصروفات.</p><div id="expense-breakdown"></div>
+  <details id="income-breakdown-section"><summary>مصادر الإيرادات</summary><p class="help">النسبة من إجمالي الإيرادات.</p><div id="income-breakdown"></div></details><p class="help">النسب مقربة لأقرب 0.1%.</p>
+ </section>
+ <section id="summary-detail-page" hidden><div class="section-heading"><h1 id="summary-detail-title"></h1><button type="button" data-back="summary">رجوع</button></div><p id="summary-detail-meta" class="help"></p><div id="summary-detail-list"></div></section>
+ <section id="more-page" hidden><h1>المزيد</h1><div class="menu-list"><button type="button" data-page="definitions">التعريفات <span>‹</span></button><button type="button" data-page="diagnostics">فحص التجربة <span>‹</span></button></div></section>
+ <section id="definitions-page" hidden><div class="section-heading"><h1>التعريفات</h1><button type="button" data-back="more">رجوع</button></div><div class="menu-list"><button type="button" data-page="categories">التصنيفات <span>مصروفات وإيرادات ‹</span></button></div></section>
  <section id="categories-page" hidden>
-  <h1>التعريفات</h1><div class="tabs" role="group" aria-label="نوع التصنيف"><button data-category-type="expense" aria-pressed="true" type="button">مصروفات</button><button data-category-type="income" aria-pressed="false" type="button">إيرادات</button></div>
+  <div class="section-heading"><h1>التصنيفات</h1><button type="button" data-back="definitions">رجوع</button></div><div class="tabs" role="group" aria-label="نوع التصنيف"><button data-category-type="expense" aria-pressed="true" type="button">مصروفات</button><button data-category-type="income" aria-pressed="false" type="button">إيرادات</button></div>
   <form id="category-form" novalidate><label for="category-name">تصنيف جديد <span>إلزامي · حتى 50 حرفًا</span></label><div class="add-category-row"><input id="category-name" autocomplete="off" maxlength="100" placeholder="مثلًا: البيت"><button id="category-save" class="primary" type="submit">إضافة</button></div><p id="category-error" class="error" role="alert" hidden></p></form>
   <div id="category-list" class="category-list"></div><p class="help">افتح التصنيف لتعديل اسمه أو تغيير حالته. الحركات السابقة تبقى محفوظة.</p>
  </section>
@@ -50,7 +59,7 @@
   <div class="button-stack"><button id="category-toggle" type="button"></button><button id="category-delete" type="button" class="danger">حذف التصنيف</button></div><p id="category-delete-help" class="help"></p>
  </section>
  <section id="diagnostics-page" hidden>
-  <h1>فحص التجربة</h1><p class="help">هذه الشاشة لتوثيق نتائج الاختبار.</p>
+  <div class="section-heading"><h1>فحص التجربة</h1><button type="button" data-back="more">رجوع</button></div><p class="help">هذه الشاشة لتوثيق نتائج الاختبار.</p>
   <dl id="diagnostics"></dl>
   <div class="button-stack"><button id="refresh-diagnostics" type="button">تحديث حالة الفحص</button><button id="check-update" type="button">التحقق من تحديث التطبيق</button><button id="request-persistence" type="button">طلب الاحتفاظ بالتخزين</button><button id="arm-failure" type="button" hidden>إلغاء الحفظ التالي — T08</button></div>
   <p class="help">جاهزية الملفات لا تعني نجاح اختبار Offline؛ أوقف Wi-Fi والبيانات الخلوية واختبر الفتح والحفظ.</p>
@@ -58,7 +67,7 @@
  </section>
  <p id="message" class="toast" role="status" aria-live="polite" hidden></p>
  </div>
- <nav id="navigation" aria-label="التنقل الرئيسي"><button type="button" data-page="home" aria-current="page">الرئيسية</button><button type="button" data-page="categories">التعريفات</button><button type="button" data-page="diagnostics">فحص التجربة</button></nav>
+ <nav id="navigation" aria-label="التنقل الرئيسي"><button type="button" data-page="home" aria-current="page">الرئيسية</button><button type="button" data-page="summary">الملخص</button><button type="button" data-page="more">المزيد</button></nav>
  </div>
  <noscript>يلزم تفعيل JavaScript لتشغيل مصاريك.</noscript>
 </main>
