@@ -28,12 +28,7 @@
   <div class="section-heading"><h1 id="entry-title">إضافة مصروف</h1><button id="close-entry" type="button" class="ghost">إغلاق ×</button></div>
   <form id="entry-form" novalidate>
    <fieldset id="entry-fields">
-    <div><label id="category-label" >التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><div id="category-quick" class="category-quick" role="group" aria-labelledby="category-label"></div><p id="category-selected" class="help" aria-live="polite">اختر التصنيف</p><button id="category-picker" class="ghost" type="button" aria-controls="category-dialog" aria-expanded="false">كل التصنيفات</button><div id="category-dialog" class="category-inline" hidden aria-labelledby="category-dialog-title">
- <div class="section-heading"><h2 id="category-dialog-title">اختر التصنيف</h2><button id="category-close" type="button" class="ghost">إغلاق ×</button></div>
- <label class="small" for="category-search">ابحث عن تصنيف</label><input id="category-search" type="search" placeholder="اكتب اسم التصنيف…" autocomplete="off">
- <p id="category-result-count" class="help" role="status" aria-live="polite"></p><div id="category-results" class="category-results" role="group" aria-label="التصنيفات المتاحة"></div>
-</div>
-    </div>
+    <div><label for="entry-category">التصنيف <span>إلزامي</span></label><select id="entry-category" required><option value="">اختر التصنيف</option></select><p id="category-empty" class="help" hidden>أضف تصنيفًا من التعريفات أولًا.</p></div>
     <div><label for="entry-amount">المبلغ <span>دينار أردني · إلزامي</span></label><input id="entry-amount" class="numeric" inputmode="decimal" autocomplete="off" placeholder="0.00" required><p class="help">حتى 3 خانات عشرية</p></div>
     <div><div class="section-heading"><label for="entry-description">الوصف <span>اختياري</span></label><span id="description-state" class="complete small" hidden>✓ مُعبّأ</span></div><textarea id="entry-description" maxlength="500" rows="2" placeholder="مثلًا: خضار"></textarea></div>
     <div><label for="entry-date">تاريخ الحركة <span>إلزامي</span></label><input id="entry-date" class="numeric" inputmode="numeric" autocomplete="off" required aria-describedby="date-help"><p id="date-help" class="help">DD/MM/YYYY · يوم / شهر / سنة</p></div>

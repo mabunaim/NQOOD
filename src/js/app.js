@@ -14,7 +14,7 @@ let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, ini
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date'].map(id => $(id).value));
 const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : page === 'category-edit' ? $('category-edit-name').value !== categoryInitial : false;
-const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && $('category-dialog').hidden && !$('category-action-dialog').open;
+const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && !$('category-action-dialog').open;
 function notify(text) { $('message').textContent = text; $('message').hidden = false; }
 function setBusy(value) { busy = value; if (!value && resetOnReturn) setTimeout(resetSession, 0); $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
 function setError(id, error) { $(id).textContent = friendlyError(error); $(id).hidden = false; }
@@ -68,48 +68,12 @@ function renderHome() {
 function availableCategories() {
   return data.categories.filter(c => c.active && c.type === entryType).sort((a,b) => a.name.localeCompare(b.name, 'ar'));
 }
-function closeCategoryPicker() {
-  $('category-dialog').hidden = true;
-  $('category-picker').setAttribute('aria-expanded', 'false');
-}
-function selectCategory(category) {
-  $('entry-category').value = category.id; closeCategoryPicker(); populateCategories();
-}
 function populateCategories() {
-  const categories = availableCategories();
-  const selected = categories.find(c => c.id === $('entry-category').value);
-  if (!selected) $('entry-category').value = '';
-  $('category-selected').textContent = selected ? `✓ ${selected.name}` : categories.length ? 'اختر التصنيف' : 'أضف تصنيفًا من التعريفات أولًا.';
-  $('category-picker').hidden = categories.length <= 4;
-  $('category-quick').replaceChildren();
-  for (const category of categories.slice(0, 4)) {
-    const button = e('button', 'category-chip', category.name); button.type = 'button';
-    button.setAttribute('aria-pressed', String(category.id === selected?.id));
-    button.onclick = () => selectCategory(category); $('category-quick').append(button);
-  }
-}
-function renderCategoryChoices() {
-  const query = $('category-search').value.trim().toLocaleLowerCase('ar');
-  const categories = availableCategories();
-  const matches = categories.filter(c => c.name.toLocaleLowerCase('ar').includes(query));
-  $('category-results').replaceChildren();
-  $('category-result-count').textContent = `${matches.length} تصنيفات`;
-  if (!matches.length) $('category-results').append(e('p', 'empty', categories.length ? 'لا توجد تصنيفات مطابقة للبحث.' : 'ما في تصنيفات فعّالة. أضف تصنيفًا من التعريفات أولًا.'));
-  for (const category of matches) {
-    const button = e('button', 'category-choice'); button.type = 'button';
-    const selected = category.id === $('entry-category').value;
-    button.setAttribute('aria-pressed', String(selected));
-    button.append(e('span', '', category.name), e('span', '', selected ? '✓' : ''));
-    button.onclick = () => { selectCategory(category); $('category-picker').focus(); };
-    $('category-results').append(button);
-  }
-}
-function openCategoryPicker() {
-  if (busy) return;
-  $('category-search').value = '';
-  $('category-dialog-title').textContent = entryType === 'income' ? 'اختر تصنيف الإيراد' : 'اختر تصنيف المصروف';
-  renderCategoryChoices(); $('category-picker').setAttribute('aria-expanded', 'true');
-  $('category-dialog').hidden = false; $('category-search').focus();
+  const categories = availableCategories(), selected = $('entry-category').value;
+  $('entry-category').replaceChildren(new Option('اختر التصنيف', ''));
+  for (const category of categories) $('entry-category').add(new Option(category.name, category.id));
+  $('entry-category').value = categories.some(c => c.id === selected) ? selected : '';
+  $('category-empty').hidden = categories.length > 0;
 }
 function descriptionState() { const filled = $('entry-description').value.trim() !== ''; $('description-state').hidden = !filled; $('entry-description').classList.toggle('filled', filled); }
 function openEntry(type) {
@@ -117,7 +81,7 @@ function openEntry(type) {
   $('entry-date').value = displayDate(todayISO()); $('entry-category').value = ''; populateCategories();
   $('entry-title').textContent = type === 'expense' ? 'إضافة مصروف' : 'إضافة إيراد'; $('save-entry').textContent = type === 'expense' ? 'حفظ المصروف' : 'حفظ الإيراد';
   $('entry-description').placeholder = type === 'expense' ? 'مثلًا: خضار' : 'مثلًا: راتب الشهر';
-  closeCategoryPicker(); descriptionState(); initial = snapshot(); show('entry'); $('category-quick').querySelector('button')?.focus();
+  descriptionState(); initial = snapshot(); show('entry'); $('entry-category').focus();
 }
 async function saveEntry() {
   if (busy) return false;
@@ -209,10 +173,6 @@ async function updateDiagnostics() {
 all('[data-page]').forEach(b => b.addEventListener('click', () => guard(() => show(b.dataset.page))));
 all('[data-category-type]').forEach(b => b.addEventListener('click', () => { if (b.dataset.categoryType !== categoryType) guard(() => { categoryType = b.dataset.categoryType; renderCategories(); }); }));
 $('add-expense').onclick = () => openEntry('expense'); $('add-income').onclick = () => openEntry('income');
-$('category-picker').onclick = () => $('category-dialog').hidden ? openCategoryPicker() : closeCategoryPicker();
-$('category-search').oninput = renderCategoryChoices;
-$('category-close').onclick = () => { closeCategoryPicker(); $('category-picker').focus(); };
-$('category-dialog').addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); closeCategoryPicker(); $('category-picker').focus(); } });
 $('close-entry').onclick = () => guard(() => show('home'));
 $('entry-form').onsubmit = async event => { event.preventDefault(); if (await saveEntry()) { show('home'); savedMessage(); } };
 $('category-edit-close').onclick = () => guard(() => show('categories'));
@@ -269,12 +229,12 @@ syncViewport();
 // Backgrounding ends the editing session. Only committed data survives.
 function resetSession() {
   if (!repository || busy) return;
-  pendingAction = null; categoryAction = null; closeCategoryPicker();
+  pendingAction = null; categoryAction = null;
   for (const dialog of all('dialog[open]')) dialog.close();
   document.activeElement?.blur();
   $('entry-form').reset(); $('entry-category').value = '';
   $('category-form').reset(); $('category-edit-form').reset();
-  $('category-search').value = ''; editingCategoryId = ''; categoryInitial = '';
+ editingCategoryId = ''; categoryInitial = '';
   for (const error of all('.error')) error.hidden = true;
   descriptionState(); initial = snapshot();
   show('home');
