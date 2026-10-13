@@ -22,7 +22,7 @@ function show(next) {
   if (resetOnReturn) next = 'home';
   page = next; closeCombo();
   for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics']) $(p + '-page').hidden = p !== next;
-  $('navigation').hidden = false; $('page-content').scrollTop = 0; $('message').hidden = true;
+  $('navigation').hidden = next === 'entry'; $('page-content').scrollTop = 0; $('message').hidden = true;
   all('[data-page]').forEach(b => { if (b.dataset.page === next) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (next === 'home') renderHome();
   if (next === 'categories') renderCategories();
@@ -112,8 +112,8 @@ function swipeRecord(row, record) {
   actions.append(edit,remove);row.append(more);wrap.append(actions,row);
   let start=null,dragging=false,suppress=false;
   row.onpointerdown=event=>{if(event.target.closest('button')||!event.isPrimary||event.button!==0)return;start={x:event.clientX,y:event.clientY};dragging=false;suppress=false;};
-  row.onpointermove=event=>{if(!start)return;const dx=event.clientX-start.x,dy=event.clientY-start.y;if(!dragging&&Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){start=null;return;}if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.3){dragging=true;row.setPointerCapture(event.pointerId);}};
-  row.onpointerup=event=>{if(start&&dragging){const dx=event.clientX-start.x;suppress=true;if(Math.abs(dx)>=40)reveal(Math.sign(dx));else close();}start=null;dragging=false;};
+  row.onpointermove=event=>{if(!start)return;const dx=event.clientX-start.x,dy=event.clientY-start.y;if(!dragging&&Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){start=null;return;}if(Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)*2){dragging=true;row.setPointerCapture(event.pointerId);}};
+  row.onpointerup=event=>{if(start&&dragging){const dx=event.clientX-start.x;suppress=true;if(Math.abs(dx)>=80&&Math.abs(dx)>Math.abs(event.clientY-start.y)*2)reveal(Math.sign(dx));else close();}start=null;dragging=false;};
   row.onpointercancel=()=>{start=null;dragging=false;};
   row.addEventListener('click',event=>{if(suppress){suppress=false;event.preventDefault();event.stopPropagation();}else if(!event.target.closest('button')&&wrap.classList.contains('revealed'))close();},true);
   row.addEventListener('keydown',event=>{if(event.key==='Escape')close();});

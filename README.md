@@ -1,6 +1,6 @@
 # مصاريك — NQOOD
 
-Personal expense PWA. Current build: **B8 — Searchable categories and transaction maintenance**.
+Personal expense PWA. Current build: **B9 — Entry space and deliberate swipes**.
 
 Application: https://mabunaim.github.io/NQOOD/
 
@@ -24,7 +24,7 @@ npm run serve
 GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs B8
+node tools/stage-pages.mjs B9
 ```
 
 Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
@@ -33,8 +33,9 @@ Keep the same URL and database name when deploying updates. Historical builds re
 
 Income and expense entry, monthly totals, searchable categories, category creation and maintenance, offline storage and controlled updates. Category maintenance preserves linked records when renaming, disabling or reactivating a category. Used categories cannot be deleted.
 
-23 Node tests and 15 Chromium browser tests passed. Physical-device category UAT is pending. Record editing and confirmed deletion are available. Reports and backup/restore are still pending.
+23 Node tests and 17 Chromium browser tests passed. Physical-device category UAT is pending. Record editing and confirmed deletion are available. Reports and backup/restore are still pending.
 
+- [B9 entry layout and swipe adjustment](docs/RELEASE_B9.md)
 - [B8 transaction maintenance and UAT](docs/RELEASE_B8.md)
 - [B7 native dropdown](docs/RELEASE_B7.md)
 - [B6 category selection](docs/RELEASE_B6.md)

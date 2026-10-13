@@ -1,2 +1,2 @@
-export const BUILD = 'B8';
-export const BUILD_NOTE = 'بحث التصنيفات وإدارة الحركات';
+export const BUILD = 'B9';
+export const BUILD_NOTE = 'إدخال أوسع وسحب أدق';
