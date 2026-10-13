@@ -1,6 +1,6 @@
 # مصاريك — NQOOD
 
-Personal expense PWA. Current build: **B4 — Fixed mobile layout**.
+Personal expense PWA. Current build: **B5 — Simpler entry and fresh sessions**.
 
 Application: https://mabunaim.github.io/NQOOD/
 
@@ -24,7 +24,7 @@ npm run serve
 GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs B4
+node tools/stage-pages.mjs B5
 ```
 
 Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
@@ -33,8 +33,9 @@ Keep the same URL and database name when deploying updates. Historical builds re
 
 Income and expense entry, monthly totals, searchable categories, category creation and maintenance, offline storage and controlled updates. Category maintenance preserves linked records when renaming, disabling or reactivating a category. Used categories cannot be deleted.
 
-20 Node tests and 11 Chromium browser tests passed. Physical-device category UAT is pending. Record editing, reports and backup/restore are still pending.
+20 Node tests and 12 Chromium browser tests passed. Physical-device category UAT is pending. Record editing, reports and backup/restore are still pending.
 
+- [B5 entry and session behavior](docs/RELEASE_B5.md)
 - [B4 layout release notes and UAT](docs/RELEASE_B4.md)
 - [B3 release notes and UAT cases](docs/RELEASE_B3.md)
 - [B1.1 release notes](docs/RELEASE_B1_1.md)

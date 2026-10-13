@@ -7,17 +7,19 @@ const all = selector => [...document.querySelectorAll(selector)];
 const testMode = location.pathname.endsWith('/fixtures/t08.html');
 const basePath = new URL('./', document.baseURI).pathname;
 const dbName = `${testMode ? 'masareek_spike_t08' : 'masareek_spike_db'}:${basePath}`;
+let resetOnReturn = false;
 let editingCategoryId = '', categoryInitial = '', categoryAction = null;
 let repository, offline, offlineError = '', data = {categories: [], records: []};
 let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, initial = '', pendingAction = null, busy = false;
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
-const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date', 'inline-name'].map(id => $(id).value));
+const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date'].map(id => $(id).value));
 const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : page === 'category-edit' ? $('category-edit-name').value !== categoryInitial : false;
 const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && !$('category-dialog').open && !$('category-action-dialog').open;
 function notify(text) { $('message').textContent = text; $('message').hidden = false; }
-function setBusy(value) { busy = value; $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
+function setBusy(value) { busy = value; if (!value && resetOnReturn) setTimeout(resetSession, 0); $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
 function setError(id, error) { $(id).textContent = friendlyError(error); $(id).hidden = false; }
 function show(next) {
+  if (resetOnReturn) next = 'home';
   page = next;
   for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics']) $(p + '-page').hidden = p !== next;
   $('navigation').hidden = false; $('page-content').scrollTop = 0; $('message').hidden = true;
@@ -32,7 +34,7 @@ function guard(action) {
   pendingAction = action; $('leave-dialog').showModal(); $('continue-editing').focus();
 }
 function clearDraft() {
-  if (page === 'entry') { $('entry-form').reset(); $('inline-name').value = ''; }
+  if (page === 'entry') { $('entry-form').reset(); }
   if (page === 'categories') $('category-name').value = '';
   if (page === 'category-edit') $('category-edit-name').value = categoryInitial;
 }
@@ -77,7 +79,7 @@ function renderCategoryChoices() {
   const matches = categories.filter(c => c.name.toLocaleLowerCase('ar').includes(query));
   $('category-results').replaceChildren();
   $('category-result-count').textContent = `${matches.length} تصنيفات`;
-  if (!matches.length) $('category-results').append(e('p', 'empty', categories.length ? 'لا توجد تصنيفات مطابقة للبحث.' : 'ما في تصنيفات بعد. أضف تصنيفًا جديدًا.'));
+  if (!matches.length) $('category-results').append(e('p', 'empty', categories.length ? 'لا توجد تصنيفات مطابقة للبحث.' : 'ما في تصنيفات فعّالة. أضف تصنيفًا من التعريفات أولًا.'));
   for (const category of matches) {
     const button = e('button', 'category-choice'); button.type = 'button';
     const selected = category.id === $('entry-category').value;
@@ -96,7 +98,7 @@ function openCategoryPicker() {
 }
 function descriptionState() { const filled = $('entry-description').value.trim() !== ''; $('description-state').hidden = !filled; $('entry-description').classList.toggle('filled', filled); }
 function openEntry(type) {
-  entryType = type; entryId = crypto.randomUUID(); $('entry-form').reset(); $('inline-name').value = ''; $('inline-box').hidden = true; $('inline-error').hidden = true; $('entry-error').hidden = true;
+  entryType = type; entryId = crypto.randomUUID(); $('entry-form').reset(); $('entry-error').hidden = true;
   $('entry-date').value = displayDate(todayISO()); $('entry-category').value = ''; populateCategories();
   $('entry-title').textContent = type === 'expense' ? 'إضافة مصروف' : 'إضافة إيراد'; $('save-entry').textContent = type === 'expense' ? 'حفظ المصروف' : 'حفظ الإيراد';
   $('entry-description').placeholder = type === 'expense' ? 'مثلًا: خضار' : 'مثلًا: راتب الشهر';
@@ -108,7 +110,6 @@ async function saveEntry() {
   let record;
   try {
     if (!$('entry-category').value) throw new Error('اختر التصنيف قبل الحفظ.');
-    if ($('inline-name').value.trim()) throw new Error('أضف التصنيف المكتوب أو ألغِ إضافته قبل حفظ الحركة.');
     record = {id: entryId, type: entryType, categoryId: $('entry-category').value, amountFils: parseMoney($('entry-amount').value), date: parseDate($('entry-date').value), description: $('entry-description').value.trim()};
     setBusy(true);
     const saved = await repository.addRecord(record);
@@ -168,15 +169,14 @@ async function applyCategoryAction() {
   } catch (error) { setError('category-edit-error', error); }
   finally { setBusy(false); }
 }
-async function saveCategory(inline = false) {
+async function saveCategory() {
   if (busy) return false;
-  const errorId = inline ? 'inline-error' : 'category-error', input = inline ? $('inline-name') : $('category-name');
+  const errorId = 'category-error', input = $('category-name');
   $(errorId).hidden = true; setBusy(true);
   try {
-    const saved = await repository.addCategory({id: crypto.randomUUID(), type: inline ? entryType : categoryType, name: input.value});
+    const saved = await repository.addCategory({id: crypto.randomUUID(), type: categoryType, name: input.value});
     data.categories.push(saved); input.value = '';
-    if (inline) { $('entry-category').value = saved.id; populateCategories(); $('inline-box').hidden = true; }
-    else renderCategories();
+    renderCategories();
     return true;
   } catch (error) { setError(errorId, error); return false; }
   finally { setBusy(false); }
@@ -199,7 +199,6 @@ $('category-search').oninput = renderCategoryChoices;
 $('category-close').onclick = () => $('category-dialog').close();
 $('category-dialog').addEventListener('close', () => { $('category-picker').setAttribute('aria-expanded', 'false'); $('category-picker').focus(); });
 $('category-dialog').addEventListener('click', event => { if (event.target !== $('category-dialog')) return; const r = event.target.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) event.target.close(); });
-$('category-create').onclick = () => { $('category-dialog').close(); $('inline-box').hidden = false; $('inline-name').focus(); };
 $('close-entry').onclick = () => guard(() => show('home'));
 $('entry-form').onsubmit = async event => { event.preventDefault(); if (await saveEntry()) { show('home'); savedMessage(); } };
 $('category-edit-close').onclick = () => guard(() => show('categories'));
@@ -210,9 +209,6 @@ $('category-action-confirm').onclick = applyCategoryAction;
 $('category-action-cancel').onclick = () => { categoryAction = null; $('category-action-dialog').close(); };
 $('category-action-dialog').addEventListener('cancel', () => { categoryAction = null; });
 $('category-form').onsubmit = async event => { event.preventDefault(); if (await saveCategory()) notify('تم حفظ التصنيف.'); };
-$('inline-add').onclick = () => { $('inline-box').hidden = false; $('inline-name').focus(); };
-$('inline-cancel').onclick = () => { $('inline-box').hidden = true; $('inline-name').value = ''; $('inline-error').hidden = true; };
-$('inline-save').onclick = () => saveCategory(true);
 $('entry-description').oninput = descriptionState;
 for (const id of ['entry-amount', 'entry-date']) $(id).addEventListener('input', () => { $(id).value = normalizeDigits($(id).value); });
 $('month').onchange = renderHome;
@@ -229,7 +225,6 @@ $('check-update').onclick = async () => { try { if (!offline) throw new Error(of
 $('install-update').onclick = () => guard(async () => { try { await offline.activate(); } catch (error) { notify(friendlyError(error)); } });
 $('request-persistence').onclick = async () => { try { const result = await navigator.storage?.persist?.(); notify(result ? 'وافق المتصفح على طلب الاحتفاظ؛ تظل النسخة الخارجية ضرورية.' : 'لم يُمنح الطلب أو الميزة غير متاحة.'); await updateDiagnostics(); } catch (error) { notify(friendlyError(error)); } };
 $('arm-failure').onclick = () => { repository.armAbortNextWrite(); notify('سيُلغى الحفظ التالي بعد تنفيذ طلب الكتابة داخل معاملة اختبارية.'); };
-window.addEventListener('beforeunload', event => { if (dirty() || busy) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('pageshow', async () => { if (repository && !dirty() && !busy) { try { data = await repository.readAll(); if (page === 'home') renderHome(); } catch (error) { notify(friendlyError(error)); } } });
 async function init() {
   try {
@@ -256,3 +251,24 @@ window.visualViewport?.addEventListener('resize', syncViewport);
 window.visualViewport?.addEventListener('scroll', syncViewport);
 window.addEventListener('resize', syncViewport);
 syncViewport();
+
+// Backgrounding ends the editing session. Only committed data survives.
+function resetSession() {
+  if (!repository || busy) return;
+  pendingAction = null; categoryAction = null;
+  for (const dialog of all('dialog[open]')) dialog.close();
+  document.activeElement?.blur();
+  $('entry-form').reset(); $('entry-category').value = '';
+  $('category-form').reset(); $('category-edit-form').reset();
+  $('category-search').value = ''; editingCategoryId = ''; categoryInitial = '';
+  for (const error of all('.error')) error.hidden = true;
+  descriptionState(); initial = snapshot();
+  show('home');
+  if (document.visibilityState === 'visible') resetOnReturn = false;
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') resetOnReturn = true;
+  if (resetOnReturn) resetSession();
+});
+window.addEventListener('pagehide', () => { resetOnReturn = true; resetSession(); });
+window.addEventListener('pageshow', event => { if (event.persisted || resetOnReturn) resetSession(); });

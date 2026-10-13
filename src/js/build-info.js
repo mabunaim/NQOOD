@@ -1,2 +1,2 @@
-export const BUILD = 'B4';
-export const BUILD_NOTE = 'واجهة ثابتة ومريحة';
+export const BUILD = 'B5';
+export const BUILD_NOTE = 'إدخال أبسط وبداية جديدة';
