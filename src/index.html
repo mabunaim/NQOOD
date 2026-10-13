@@ -16,6 +16,7 @@
  <p id="startup" role="status">جارٍ فتح البيانات…</p>
  <div id="workspace" hidden>
  <aside id="update-banner" hidden><span>تحديث جاهز</span><button id="install-update" type="button">تحديث الآن</button></aside>
+ <div id="page-content" tabindex="-1">
  <section id="home-page">
   <div class="month-row"><label for="month">الشهر</label><select id="month"></select><span id="days" class="muted small"></span></div>
   <div class="balance"><div class="muted">المتبقي للشهر</div><div class="balance-number"><bdi id="remaining" class="num">0</bdi> <small>دينار</small></div><div class="totals"><div><span class="muted small">إجمالي الإيرادات</span><bdi id="income-total" class="num value">0</bdi></div><div><span class="muted small">إجمالي المصروفات</span><bdi id="expense-total" class="num value">0</bdi></div></div></div>
@@ -57,6 +58,7 @@
   <a id="t08-link" href="fixtures/t08.html">فتح تجربة فشل الحفظ المعزولة T08</a><a id="normal-link" href="./" hidden>العودة للتجربة الرئيسية</a>
  </section>
  <p id="message" class="toast" role="status" aria-live="polite" hidden></p>
+ </div>
  <nav id="navigation" aria-label="التنقل الرئيسي"><button type="button" data-page="home" aria-current="page">الرئيسية</button><button type="button" data-page="categories">التعريفات</button><button type="button" data-page="diagnostics">فحص التجربة</button></nav>
  </div>
  <noscript>يلزم تفعيل JavaScript لتشغيل مصاريك.</noscript>

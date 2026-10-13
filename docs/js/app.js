@@ -20,7 +20,7 @@ function setError(id, error) { $(id).textContent = friendlyError(error); $(id).h
 function show(next) {
   page = next;
   for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics']) $(p + '-page').hidden = p !== next;
-  $('navigation').hidden = next === 'entry' || next === 'category-edit'; $('message').hidden = true;
+  $('navigation').hidden = false; $('page-content').scrollTop = 0; $('message').hidden = true;
   all('[data-page]').forEach(b => { if (b.dataset.page === next) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (next === 'home') renderHome();
   if (next === 'categories') renderCategories();
@@ -243,3 +243,16 @@ async function init() {
   } catch (error) { $('startup').textContent = 'تعذر فتح البيانات: ' + friendlyError(error) + ' أعد فتح التطبيق بعد معالجة السبب.'; $('startup').setAttribute('role', 'alert'); }
 }
 init();
+
+// Match the visible viewport when the mobile keyboard opens; do not override pinch zoom.
+function syncViewport() {
+  const viewport = window.visualViewport;
+  if (viewport && viewport.scale === 1) {
+    document.documentElement.style.setProperty('--app-height', `${viewport.height}px`);
+    document.documentElement.style.setProperty('--app-top', `${viewport.offsetTop}px`);
+  }
+}
+window.visualViewport?.addEventListener('resize', syncViewport);
+window.visualViewport?.addEventListener('scroll', syncViewport);
+window.addEventListener('resize', syncViewport);
+syncViewport();

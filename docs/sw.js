@@ -1,4 +1,4 @@
-const BUILD = 'B3';
+const BUILD = 'B4';
 const ASSETS = ["css/app.css","fixtures/t08.html","icons/apple-touch.png","icons/icon-192.png","icons/icon-512.png","index.html","js/app.js","js/build-info.js","js/db.js","js/domain.js","js/offline.js","manifest.webmanifest"];
 const PREFIX = `masareek-spike:${self.registration.scope}:assets:`;
 const CACHE = PREFIX + BUILD;

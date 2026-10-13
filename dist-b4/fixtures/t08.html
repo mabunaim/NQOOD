@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<base href="../">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#25262a"><meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="مصاريك">
+<title>مصاريك — فشل الحفظ T08</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch.png"><link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css"><script type="module" src="js/app.js"></script>
+</head>
+<body>
+<main id="app">
+ <header class="brand-row"><span class="brand">مصاريك<span class="brand-dot">.</span></span><span class="tag">نسخة تجريبية</span></header>
+ <p class="notice">لبيانات الاختبار فقط · النسخ الاحتياطي لم يُنفّذ بعد</p>
+ <p id="isolated-label" class="notice" hidden>اختبار T08 · قاعدة معزولة عن بقية التجربة</p>
+ <p id="startup" role="status">جارٍ فتح البيانات…</p>
+ <div id="workspace" hidden>
+ <aside id="update-banner" hidden><span>تحديث جاهز</span><button id="install-update" type="button">تحديث الآن</button></aside>
+ <div id="page-content" tabindex="-1">
+ <section id="home-page">
+  <div class="month-row"><label for="month">الشهر</label><select id="month"></select><span id="days" class="muted small"></span></div>
+  <div class="balance"><div class="muted">المتبقي للشهر</div><div class="balance-number"><bdi id="remaining" class="num">0</bdi> <small>دينار</small></div><div class="totals"><div><span class="muted small">إجمالي الإيرادات</span><bdi id="income-total" class="num value">0</bdi></div><div><span class="muted small">إجمالي المصروفات</span><bdi id="expense-total" class="num value">0</bdi></div></div></div>
+  <div class="two-actions"><button id="add-expense" type="button" class="primary">− إضافة مصروف</button><button id="add-income" type="button">+ إضافة إيراد</button></div>
+  <div class="section-heading"><h2>حركات الشهر</h2><span id="record-count" class="muted small"></span></div>
+  <div id="history"></div>
+ </section>
+ <section id="entry-page" hidden>
+  <div class="section-heading"><h1 id="entry-title">إضافة مصروف</h1><button id="close-entry" type="button" class="ghost">إغلاق ×</button></div>
+  <form id="entry-form" novalidate>
+   <fieldset id="entry-fields">
+    <div><label id="category-label" for="category-picker">التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><button id="category-picker" class="category-picker" type="button" aria-haspopup="dialog" aria-controls="category-dialog" aria-expanded="false"><span id="category-selected">اختر التصنيف</span><span aria-hidden="true">⌄</span></button><button id="inline-add" type="button" class="ghost">+ تصنيف جديد</button>
+     <div id="inline-box" class="inset" hidden><label for="inline-name">اسم التصنيف</label><input id="inline-name" maxlength="100" autocomplete="off"><p id="inline-error" class="error" role="alert" hidden></p><div class="two-actions"><button id="inline-save" type="button">إضافة التصنيف</button><button id="inline-cancel" type="button" class="ghost">إلغاء</button></div></div>
+    </div>
+    <div><label for="entry-amount">المبلغ <span>دينار أردني · إلزامي</span></label><input id="entry-amount" class="numeric" inputmode="decimal" autocomplete="off" placeholder="0.00" required><p class="help">حتى 3 خانات عشرية</p></div>
+    <div><div class="section-heading"><label for="entry-description">الوصف <span>اختياري</span></label><span id="description-state" class="complete small" hidden>✓ مُعبّأ</span></div><textarea id="entry-description" maxlength="500" rows="2" placeholder="مثلًا: خضار"></textarea></div>
+    <div><label for="entry-date">تاريخ الحركة <span>إلزامي</span></label><input id="entry-date" class="numeric" inputmode="numeric" autocomplete="off" required aria-describedby="date-help"><p id="date-help" class="help">DD/MM/YYYY · يوم / شهر / سنة</p></div>
+    <p id="entry-error" class="error" role="alert" hidden></p>
+    <button id="save-entry" class="primary full" type="submit">حفظ المصروف</button>
+   </fieldset>
+  </form>
+ </section>
+ <section id="categories-page" hidden>
+  <h1>التعريفات</h1><div class="tabs" role="group" aria-label="نوع التصنيف"><button data-category-type="expense" aria-pressed="true" type="button">مصروفات</button><button data-category-type="income" aria-pressed="false" type="button">إيرادات</button></div>
+  <form id="category-form" novalidate><label for="category-name">تصنيف جديد <span>إلزامي · حتى 50 حرفًا</span></label><div class="add-category-row"><input id="category-name" autocomplete="off" maxlength="100" placeholder="مثلًا: البيت"><button id="category-save" class="primary" type="submit">إضافة</button></div><p id="category-error" class="error" role="alert" hidden></p></form>
+  <div id="category-list" class="category-list"></div><p class="help">افتح التصنيف لتعديل اسمه أو تغيير حالته. الحركات السابقة تبقى محفوظة.</p>
+ </section>
+ <section id="category-edit-page" hidden>
+  <div class="section-heading"><h1>إدارة التصنيف</h1><button id="category-edit-close" class="ghost" type="button">إغلاق ×</button></div>
+  <p id="category-edit-meta" class="help"></p>
+  <form id="category-edit-form" novalidate><fieldset id="category-edit-fields"><div><label for="category-edit-name">اسم التصنيف <span>إلزامي · حتى 50 حرفًا</span></label><input id="category-edit-name" maxlength="100" autocomplete="off"></div><p id="category-edit-error" class="error" role="alert" hidden></p><button class="primary full" type="submit">حفظ الاسم</button></fieldset></form>
+  <div class="button-stack"><button id="category-toggle" type="button"></button><button id="category-delete" type="button" class="danger">حذف التصنيف</button></div><p id="category-delete-help" class="help"></p>
+ </section>
+ <section id="diagnostics-page" hidden>
+  <h1>فحص التجربة</h1><p class="help">هذه الشاشة لتوثيق نتائج الاختبار.</p>
+  <dl id="diagnostics"></dl>
+  <div class="button-stack"><button id="refresh-diagnostics" type="button">تحديث حالة الفحص</button><button id="check-update" type="button">التحقق من تحديث التطبيق</button><button id="request-persistence" type="button">طلب الاحتفاظ بالتخزين</button><button id="arm-failure" type="button" hidden>إلغاء الحفظ التالي — T08</button></div>
+  <p class="help">جاهزية الملفات لا تعني نجاح اختبار Offline؛ أوقف Wi-Fi والبيانات الخلوية واختبر الفتح والحفظ.</p>
+  <a id="t08-link" href="fixtures/t08.html">فتح تجربة فشل الحفظ المعزولة T08</a><a id="normal-link" href="./" hidden>العودة للتجربة الرئيسية</a>
+ </section>
+ <p id="message" class="toast" role="status" aria-live="polite" hidden></p>
+ </div>
+ <nav id="navigation" aria-label="التنقل الرئيسي"><button type="button" data-page="home" aria-current="page">الرئيسية</button><button type="button" data-page="categories">التعريفات</button><button type="button" data-page="diagnostics">فحص التجربة</button></nav>
+ </div>
+ <noscript>يلزم تفعيل JavaScript لتشغيل مصاريك.</noscript>
+</main>
+<dialog id="category-dialog" class="category-sheet" aria-labelledby="category-dialog-title">
+ <div class="section-heading"><h2 id="category-dialog-title">اختر التصنيف</h2><button id="category-close" type="button" class="ghost" autofocus>إغلاق ×</button></div>
+ <label class="small" for="category-search">ابحث عن تصنيف</label><input id="category-search" type="search" placeholder="اكتب اسم التصنيف…" autocomplete="off">
+ <p id="category-result-count" class="help" role="status" aria-live="polite"></p><div id="category-results" class="category-results" role="group" aria-label="التصنيفات المتاحة"></div>
+ <button id="category-create" class="full" type="button">+ تصنيف جديد</button>
+</dialog>
+<dialog id="category-action-dialog" aria-labelledby="category-action-title"><h2 id="category-action-title"></h2><p id="category-action-text"></p><div class="button-stack"><button id="category-action-confirm" type="button" class="primary">تأكيد</button><button id="category-action-cancel" type="button" autofocus>إلغاء</button></div></dialog>
+<dialog id="leave-dialog" aria-labelledby="leave-title"><h2 id="leave-title">عندك تغييرات غير محفوظة</h2><p>شو بدك تعمل قبل المغادرة؟</p><div class="button-stack"><button id="save-leave" class="primary" type="button">حفظ ومغادرة</button><button id="discard" class="danger" type="button">تجاهل التغييرات — Discard</button><button id="continue-editing" type="button" autofocus>متابعة التعديل</button></div></dialog>
+</body></html>
