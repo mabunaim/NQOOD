@@ -1,2 +1,2 @@
-export const BUILD = 'B1';
-export const BUILD_NOTE = 'نسخة التحقق الأولى';
+export const BUILD = 'B1.1';
+export const BUILD_NOTE = 'اختيار التصنيف مع البحث';

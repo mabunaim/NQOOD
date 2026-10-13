@@ -2,7 +2,7 @@
   "config": {
     "argv": [
       "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "/workspace/scratch/2d4c83107257/masareek-spike/node_modules/@playwright/test/cli.js",
+      "/workspace/scratch/2d4c83107257/masareek-spike/node_modules/.bin/playwright",
       "test"
     ],
     "configFile": "/workspace/scratch/2d4c83107257/masareek-spike/playwright.config.mjs",
@@ -129,12 +129,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1296,
+                  "duration": 1310,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:11.389Z",
+                  "startTime": "2026-10-13T04:02:39.755Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -144,7 +144,7 @@
           ],
           "id": "4fb2437618ff1ca10639-4ec832820e97e3b02314",
           "file": "app.spec.mjs",
-          "line": 11,
+          "line": 12,
           "column": 1
         },
         {
@@ -163,12 +163,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 855,
+                  "duration": 810,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:12.941Z",
+                  "startTime": "2026-10-13T04:02:41.132Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -178,7 +178,7 @@
           ],
           "id": "4fb2437618ff1ca10639-28d2fcd49348a68c293a",
           "file": "app.spec.mjs",
-          "line": 15,
+          "line": 16,
           "column": 1
         },
         {
@@ -197,12 +197,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1226,
+                  "duration": 1146,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:13.807Z",
+                  "startTime": "2026-10-13T04:02:41.953Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -212,11 +212,11 @@
           ],
           "id": "4fb2437618ff1ca10639-2ce65bc2e5b2e4089ec6",
           "file": "app.spec.mjs",
-          "line": 21,
+          "line": 22,
           "column": 1
         },
         {
-          "title": "B1 to B2: dirty input guarded, same DB retained, offline restart",
+          "title": "B1.1 to B2: dirty input guarded, same DB retained, offline restart",
           "ok": true,
           "tags": [],
           "tests": [
@@ -231,12 +231,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1996,
+                  "duration": 1998,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:15.046Z",
+                  "startTime": "2026-10-13T04:02:43.111Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -244,9 +244,9 @@
               "status": "expected"
             }
           ],
-          "id": "4fb2437618ff1ca10639-d56a0d8c7a8751bea26e",
+          "id": "4fb2437618ff1ca10639-fd26aa64eb754e2c0910",
           "file": "app.spec.mjs",
-          "line": 26,
+          "line": 27,
           "column": 1
         },
         {
@@ -265,12 +265,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 666,
+                  "duration": 662,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:17.057Z",
+                  "startTime": "2026-10-13T04:02:45.117Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -280,7 +280,7 @@
           ],
           "id": "4fb2437618ff1ca10639-6c6357cb976b7bc92451",
           "file": "app.spec.mjs",
-          "line": 30,
+          "line": 31,
           "column": 1
         },
         {
@@ -299,12 +299,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 479,
+                  "duration": 429,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-12T17:31:17.735Z",
+                  "startTime": "2026-10-13T04:02:45.788Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -314,7 +314,75 @@
           ],
           "id": "4fb2437618ff1ca10639-b1e4d1d93fc5facdb45e",
           "file": "app.spec.mjs",
-          "line": 33,
+          "line": 34,
+          "column": 1
+        },
+        {
+          "title": "search picker: many categories, filtering, cancel, selected state and income separation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 521,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T04:02:46.226Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4fb2437618ff1ca10639-b2ed5f302ae3c156b760",
+          "file": "app.spec.mjs",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "existing B1 upgrades to B1.1 with records and categories retained",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1898,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T04:02:46.755Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4fb2437618ff1ca10639-9f9991c5d9e64f1fee10",
+          "file": "app.spec.mjs",
+          "line": 45,
           "column": 1
         }
       ]
@@ -322,9 +390,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-12T17:31:10.865Z",
-    "duration": 7398.521000000001,
-    "expected": 6,
+    "startTime": "2026-10-13T04:02:39.212Z",
+    "duration": 9501.426,
+    "expected": 8,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

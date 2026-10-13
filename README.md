@@ -1,6 +1,6 @@
 # مصاريك — NQOOD
 
-Personal expense PWA · SPK-001 technical spike · B1
+Personal expense PWA · SPK-001 technical spike · B1.1
 
 Repository: https://github.com/mabunaim/NQOOD
 
@@ -26,10 +26,10 @@ npm run test:browser
 npm run serve
 ```
 
-To refresh the B1 files in the Pages publishing folder:
+To refresh the B1.1 files in the Pages publishing folder:
 
 ```sh
-node tools/stage-pages.mjs B1
+node tools/stage-pages.mjs B1.1
 ```
 
 Only when the B1 device tests reach SPK-T06, stage B2 and commit the changed docs files:
@@ -50,3 +50,6 @@ Keep the same Pages URL and device storage for the B1→B2 test. Do not launch d
 18 Node tests and 6 Chromium tests passed locally. Physical iPhone/Safari tests and UAT are pending. Categories can be created; disabling/reactivating categories, record maintenance, reports and backup/restore remain in the full-product backlog.
 
 The October 12 packaged guides retain their pre-upload status. This repository now contains the source and B1 deployment files; enabling Pages and verifying the live deployment are the next steps. No financial transactions or account credentials are included.
+
+## B1.1 — 2026-10-13
+Searchable category sheet approved by Mahmoud. 8 Chromium browser tests passed, including B1 → B1.1 preservation. See [release note](docs/RELEASE_B1_1.md). The original B1 files remain in dist-b1 for update regression testing.

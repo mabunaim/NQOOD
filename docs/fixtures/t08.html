@@ -28,7 +28,7 @@
   <div class="section-heading"><h1 id="entry-title">إضافة مصروف</h1><button id="close-entry" type="button" class="ghost">إغلاق ×</button></div>
   <form id="entry-form" novalidate>
    <fieldset id="entry-fields">
-    <div><label for="entry-category">التصنيف <span>إلزامي</span></label><select id="entry-category" required><option value="">اختر التصنيف</option></select><button id="inline-add" type="button" class="ghost">+ تصنيف جديد</button>
+    <div><label id="category-label" for="category-picker">التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><button id="category-picker" class="category-picker" type="button" aria-haspopup="dialog" aria-controls="category-dialog" aria-expanded="false"><span id="category-selected">اختر التصنيف</span><span aria-hidden="true">⌄</span></button><button id="inline-add" type="button" class="ghost">+ تصنيف جديد</button>
      <div id="inline-box" class="inset" hidden><label for="inline-name">اسم التصنيف</label><input id="inline-name" maxlength="100" autocomplete="off"><p id="inline-error" class="error" role="alert" hidden></p><div class="two-actions"><button id="inline-save" type="button">إضافة التصنيف</button><button id="inline-cancel" type="button" class="ghost">إلغاء</button></div></div>
     </div>
     <div><label for="entry-amount">المبلغ <span>دينار أردني · إلزامي</span></label><input id="entry-amount" class="numeric" inputmode="decimal" autocomplete="off" placeholder="0.00" required><p class="help">حتى 3 خانات عشرية</p></div>
@@ -56,5 +56,11 @@
  </div>
  <noscript>يلزم تفعيل JavaScript لتشغيل مصاريك.</noscript>
 </main>
+<dialog id="category-dialog" class="category-sheet" aria-labelledby="category-dialog-title">
+ <div class="section-heading"><h2 id="category-dialog-title">اختر التصنيف</h2><button id="category-close" type="button" class="ghost" autofocus>إغلاق ×</button></div>
+ <label class="small" for="category-search">ابحث عن تصنيف</label><input id="category-search" type="search" placeholder="اكتب اسم التصنيف…" autocomplete="off">
+ <p id="category-result-count" class="help" role="status" aria-live="polite"></p><div id="category-results" class="category-results" role="group" aria-label="التصنيفات المتاحة"></div>
+ <button id="category-create" class="full" type="button">+ تصنيف جديد</button>
+</dialog>
 <dialog id="leave-dialog" aria-labelledby="leave-title"><h2 id="leave-title">عندك تغييرات غير محفوظة</h2><p>شو بدك تعمل قبل المغادرة؟</p><div class="button-stack"><button id="save-leave" class="primary" type="button">حفظ ومغادرة</button><button id="discard" class="danger" type="button">تجاهل التغييرات — Discard</button><button id="continue-editing" type="button" autofocus>متابعة التعديل</button></div></dialog>
 </body></html>
