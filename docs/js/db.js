@@ -107,6 +107,38 @@ export function createRepository(db, {testMode = false} = {}) {
         };
       });
     },
+    async updateRecord(record) {
+      validateRecord(record);
+      return atomic(db, ['categories', 'transactions'], 'readwrite', (tx, done, abort) => {
+        const records = tx.objectStore('transactions'), request = records.get(record.id);
+        request.onsuccess = () => {
+          const old = request.result;
+          if (!old) { abort(new Error('الحركة غير موجودة.')); return; }
+          if (old.type !== record.type) { abort(new Error('لا يمكن تغيير نوع الحركة.')); return; }
+          if (old.ym !== record.date.slice(0, 7)) { abort(new Error('لا يمكن نقل الحركة إلى شهر آخر.')); return; }
+          const category = tx.objectStore('categories').get(record.categoryId);
+          category.onsuccess = () => {
+            const cat = category.result;
+            if (!cat || cat.type !== old.type || (!cat.active && cat.id !== old.categoryId)) { abort(new Error('اختر تصنيفًا فعّالًا مطابقًا لنوع الحركة.')); return; }
+            const saved = {...old, categoryId:record.categoryId, amountFils:record.amountFils, date:record.date, description:record.description, updatedAt:new Date().toISOString()};
+            records.put(saved).onsuccess = () => {
+              if (testMode && abortNext) { abortNext = false; abort(new Error('T08: لم يُحفظ التعديل.')); } else done(saved);
+            };
+          };
+        };
+      });
+    },
+    async deleteRecord(id) {
+      return atomic(db, ['transactions'], 'readwrite', (tx, done, abort) => {
+        const records = tx.objectStore('transactions'), request = records.get(id);
+        request.onsuccess = () => {
+          if (!request.result) { abort(new Error('الحركة غير موجودة.')); return; }
+          records.delete(id).onsuccess = () => {
+            if (testMode && abortNext) { abortNext = false; abort(new Error('T08: لم تُحذف الحركة.')); } else done(id);
+          };
+        };
+      });
+    },
     armAbortNextWrite() {
       if (!testMode) throw new Error('حقن الفشل مسموح في قاعدة الاختبار المعزولة فقط.');
       abortNext = true;

@@ -22,13 +22,13 @@
   <div class="balance"><div class="muted">المتبقي للشهر</div><div class="balance-number"><bdi id="remaining" class="num">0</bdi> <small>دينار</small></div><div class="totals"><div><span class="muted small">إجمالي الإيرادات</span><bdi id="income-total" class="num value">0</bdi></div><div><span class="muted small">إجمالي المصروفات</span><bdi id="expense-total" class="num value">0</bdi></div></div></div>
   <div class="two-actions"><button id="add-expense" type="button" class="primary">− إضافة مصروف</button><button id="add-income" type="button">+ إضافة إيراد</button></div>
   <div class="section-heading"><h2>حركات الشهر</h2><span id="record-count" class="muted small"></span></div>
-  <div id="history"></div>
+  <p id="swipe-hint" class="help" hidden>اسحب الحركة يمينًا أو يسارًا للتعديل والحذف، أو اضغط ⋯</p><div id="history"></div>
  </section>
  <section id="entry-page" hidden>
   <div class="section-heading"><h1 id="entry-title">إضافة مصروف</h1><button id="close-entry" type="button" class="ghost">إغلاق ×</button></div>
   <form id="entry-form" novalidate>
    <fieldset id="entry-fields">
-    <div><label for="entry-category">التصنيف <span>إلزامي</span></label><select id="entry-category" required><option value="">اختر التصنيف</option></select><p id="category-empty" class="help" hidden>أضف تصنيفًا من التعريفات أولًا.</p></div>
+    <div id="category-combo" class="combo"><label for="category-input">التصنيف <span>إلزامي</span></label><input id="entry-category" type="hidden"><div class="combo-field"><input id="category-input" role="combobox" aria-autocomplete="list" aria-controls="category-options" aria-expanded="false" aria-required="true" autocomplete="off" placeholder="اختر التصنيف أو ابحث…"><button id="category-toggle-list" type="button" aria-label="عرض التصنيفات" aria-controls="category-options" aria-expanded="false">⌄</button></div><div id="category-popup" class="combo-popup" hidden><div id="category-options" role="listbox" aria-label="التصنيفات"></div><p id="category-no-results" class="help" hidden>لا توجد نتائج. إنشاء التصنيفات من التعريفات.</p></div><p id="category-empty" class="help" hidden>أضف تصنيفًا من التعريفات أولًا.</p></div>
     <div><label for="entry-amount">المبلغ <span>دينار أردني · إلزامي</span></label><input id="entry-amount" class="numeric" inputmode="decimal" autocomplete="off" placeholder="0.00" required><p class="help">حتى 3 خانات عشرية</p></div>
     <div><div class="section-heading"><label for="entry-description">الوصف <span>اختياري</span></label><span id="description-state" class="complete small" hidden>✓ مُعبّأ</span></div><textarea id="entry-description" maxlength="500" rows="2" placeholder="مثلًا: خضار"></textarea></div>
     <div><label for="entry-date">تاريخ الحركة <span>إلزامي</span></label><input id="entry-date" class="numeric" inputmode="numeric" autocomplete="off" required aria-describedby="date-help"><p id="date-help" class="help">DD/MM/YYYY · يوم / شهر / سنة</p></div>
@@ -64,4 +64,5 @@
 
 <dialog id="category-action-dialog" aria-labelledby="category-action-title"><h2 id="category-action-title"></h2><p id="category-action-text"></p><div class="button-stack"><button id="category-action-confirm" type="button" class="primary">تأكيد</button><button id="category-action-cancel" type="button" autofocus>إلغاء</button></div></dialog>
 <dialog id="leave-dialog" aria-labelledby="leave-title"><h2 id="leave-title">عندك تغييرات غير محفوظة</h2><p>شو بدك تعمل قبل المغادرة؟</p><div class="button-stack"><button id="save-leave" class="primary" type="button">حفظ ومغادرة</button><button id="discard" class="danger" type="button">تجاهل التغييرات — Discard</button><button id="continue-editing" type="button" autofocus>متابعة التعديل</button></div></dialog>
+<dialog id="record-delete-dialog" aria-labelledby="record-delete-title"><h2 id="record-delete-title">حذف الحركة؟</h2><p id="record-delete-details"></p><p>سيتم تحديث المجاميع بعد الحذف.</p><p id="record-delete-error" class="error" role="alert" hidden></p><div class="two-actions"><button id="record-delete-confirm" type="button" class="danger">حذف الحركة</button><button id="record-delete-cancel" type="button" autofocus>إلغاء</button></div></dialog>
 </body></html>
