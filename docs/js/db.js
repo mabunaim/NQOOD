@@ -140,12 +140,15 @@ export function createRepository(db, {testMode = false} = {}) {
         };
       });
     },
-    async clearAllData() {
-      return atomic(db, ['categories', 'transactions', 'meta'], 'readwrite', (tx, done, abort) => {
-        for (const name of ['categories', 'transactions', 'meta']) tx.objectStore(name).clear();
-        tx.objectStore('meta').put({key:'schemaVersion',value:DB_VERSION}).onsuccess = () => {
-          if (testMode && abortNext) { abortNext=false; abort(new Error('T08: تعذر المسح؛ بقيت البيانات كما هي.')); }
-          else done({categories:[],records:[]});
+    async deleteMonth(month) {
+      if (typeof month !== 'string' || !/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('اختر شهرًا صحيحًا.');
+      return atomic(db, ['transactions'], 'readwrite', (tx, done, abort) => {
+        let count=0; const request=tx.objectStore('transactions').index('month').openCursor(month);
+        request.onsuccess=()=>{
+          const cursor=request.result;
+          if(cursor){cursor.delete();count++;cursor.continue();return;}
+          if(testMode && abortNext){abortNext=false;abort(new Error('T08: تعذر مسح الشهر؛ بقيت البيانات كما هي.'));}
+          else done(count);
         };
       });
     },

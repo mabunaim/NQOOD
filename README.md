@@ -1,6 +1,6 @@
 # مصاريك — NQOOD
 
-Personal expense PWA. Current build: **V1.0.1 — Clear data and start fresh**.
+Personal expense PWA. Current build: **V1.0.2 — Today and month-specific deletion**.
 
 Application: https://mabunaim.github.io/NQOOD/
 
@@ -24,7 +24,7 @@ npm run serve
 GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs V1.0.1
+node tools/stage-pages.mjs V1.0.2
 ```
 
 Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
@@ -35,6 +35,7 @@ Income and expense entry, monthly totals, searchable categories, category creati
 
 28 Node tests and 22 Chromium browser tests passed. Core user acceptance checks have been approved for this personal-use release. Record editing and confirmed deletion are available. Monthly category reports are available. Validated JSON export and atomic replacement restore are available, with a local pre-restore recovery snapshot. Backup export/import has been accepted in user testing.
 
+- [V1.0.2 monthly deletion](docs/RELEASE_V1_0_2.md)
 - [V1.0.1 clear data](docs/RELEASE_V1_0_1.md)
 - [V1.0.0 release](docs/RELEASE_V1.md)
 - [B12 summary layout](docs/RELEASE_B12.md)

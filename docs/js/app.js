@@ -53,6 +53,7 @@ function monthOptions() {
   $('month').value = selected;
 }
 function renderHome() {
+  $('today-date').textContent=displayDate(todayISO());$('today-date').dateTime=todayISO();
   monthOptions();
   const month = $('month').value, totals = monthlyTotals(data.records, month);
   $('income-total').textContent = formatMoney(totals.income); $('expense-total').textContent = formatMoney(totals.expense); $('remaining').textContent = formatMoney(totals.remaining);
@@ -433,17 +434,32 @@ $('backup-restore').onclick=async()=>{
   finally{setBusy(false);$('backup-restore').disabled=!pendingBackup||!$('backup-consent').checked;$('backup-cancel').disabled=false;$('backup-file').disabled=false;}
 };
 
-$('clear-data-open').onclick=()=>guard(()=>{$('clear-data-error').hidden=true;$('clear-data-dialog').showModal();$('clear-data-cancel').focus();});
+
+function previewMonthDeletion(){
+  const month=$('clear-data-month').value, records=data.records.filter(r=>r.ym===month), totals=monthlyTotals(records,month);
+  $('clear-data-confirm').disabled=!records.length;
+  $('clear-data-preview').textContent=records.length ? `${month} · ${records.length} حركات · مصروفات ${formatMoney(totals.expense)} · إيرادات ${formatMoney(totals.income)} دينار. لا يمكن التراجع إلا باستعادة نسخة احتياطية.` : 'لا توجد أشهر تحتوي على حركات.';
+}
+$('clear-data-month').onchange=previewMonthDeletion;
+$('clear-data-open').onclick=()=>guard(async()=>{
+  try{
+    data=await repository.readAll();const months=[...new Set(data.records.map(r=>r.ym))].sort().reverse();
+    $('clear-data-month').replaceChildren(...months.map(month=>new Option(month,month)));
+    if(months.includes($('month').value))$('clear-data-month').value=$('month').value;
+    $('clear-data-error').hidden=true;previewMonthDeletion();$('clear-data-dialog').showModal();$('clear-data-cancel').focus();
+  }catch(error){notify(friendlyError(error));}
+});
 $('clear-data-cancel').onclick=()=>{if(!busy)$('clear-data-dialog').close();};
 $('clear-data-dialog').addEventListener('cancel',event=>{if(busy)event.preventDefault();});
 $('clear-data-confirm').onclick=async()=>{
-  if(busy)return;
-  setBusy(true);$('clear-data-confirm').disabled=true;$('clear-data-cancel').disabled=true;
+  const month=$('clear-data-month').value;if(busy||!month)return;
+  setBusy(true);$('clear-data-confirm').disabled=true;$('clear-data-cancel').disabled=true;$('clear-data-month').disabled=true;
   try{
-    data=await repository.clearAllData();clearBackupPreview();$('clear-data-dialog').close();
-    $('month').replaceChildren();$('summary-month').replaceChildren();summaryType='expense';
-    $('backup-status').textContent='';$('backup-recovery').hidden=true;$('summary-detail-list').replaceChildren();
-    setBusy(false);resetSession();notify('تم مسح جميع البيانات. يمكنك الآن البدء بإدخال بياناتك الجديدة.');
+    const count=await repository.deleteMonth(month);data=await repository.readAll();clearBackupPreview();$('clear-data-dialog').close();
+    $('month').replaceChildren();$('summary-month').replaceChildren();$('summary-detail-list').replaceChildren();
+    setBusy(false);resetSession();notify(`تم مسح بيانات شهر ${month}: ${count} حركات. التصنيفات وباقي الأشهر محفوظة.`);
   }catch(error){setError('clear-data-error',error);}
-  finally{setBusy(false);$('clear-data-confirm').disabled=false;$('clear-data-cancel').disabled=false;}
+  finally{setBusy(false);$('clear-data-confirm').disabled=false;$('clear-data-cancel').disabled=false;$('clear-data-month').disabled=false;}
 };
+// Refresh the local calendar date if the app stays open across midnight.
+setInterval(()=>{if(page==='home' && document.visibilityState==='visible'){$('today-date').textContent=displayDate(todayISO());$('today-date').dateTime=todayISO();}},60000);

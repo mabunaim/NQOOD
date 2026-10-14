@@ -1,2 +1,2 @@
-export const BUILD = 'V1.0.1';
-export const BUILD_NOTE = 'مسح البيانات والبدء من جديد';
+export const BUILD = 'V1.0.2';
+export const BUILD_NOTE = 'تاريخ اليوم ومسح شهر محدد';
