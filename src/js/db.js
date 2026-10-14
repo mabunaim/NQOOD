@@ -1,3 +1,4 @@
+import {validateBackup, createBackup} from './backup.js';
 import {categoryName, validType, validateRecord} from './domain.js';
 export const DB_VERSION = 1;
 export function openDatabase(name, factory = globalThis.indexedDB) {
@@ -137,6 +138,32 @@ export function createRepository(db, {testMode = false} = {}) {
             if (testMode && abortNext) { abortNext = false; abort(new Error('T08: لم تُحذف الحركة.')); } else done(id);
           };
         };
+      });
+    },
+    async readRecovery() {
+      return atomic(db, ['meta'], 'readonly', (tx, done) => {
+        tx.objectStore('meta').get('beforeRestore').onsuccess = event => done(event.target.result?.value || null);
+      });
+    },
+    async restoreBackup(input) {
+      const backup = validateBackup(input);
+      return atomic(db, ['categories', 'transactions', 'meta'], 'readwrite', (tx, done, abort) => {
+        const categories = tx.objectStore('categories'), records = tx.objectStore('transactions');
+        const old = {categories:[],records:[]}; let pending = 2;
+        const replace = () => {
+          if (--pending) return;
+          tx.objectStore('meta').put({key:'beforeRestore',value:createBackup(old)});
+          categories.clear(); records.clear();
+          for (const c of backup.categories) categories.add(c);
+          for (const r of backup.records) records.add(r);
+          const finish = tx.objectStore('meta').put({key:'lastRestore',value:new Date().toISOString()});
+          finish.onsuccess = () => {
+            if (testMode && abortNext) { abortNext=false; abort(new Error('T08: فشلت الاستعادة؛ لم تتغير البيانات.')); }
+            else done({categories:backup.categories,records:backup.records});
+          };
+        };
+        categories.getAll().onsuccess = event => { old.categories=event.target.result; replace(); };
+        records.getAll().onsuccess = event => { old.records=event.target.result; replace(); };
       });
     },
     armAbortNextWrite() {

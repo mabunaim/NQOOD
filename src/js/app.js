@@ -1,3 +1,4 @@
+import {createBackup, parseBackup} from './backup.js';
 import {parseMoney, formatMoney, todayISO, displayDate, parseDate, monthlyTotals, daysLabel, normalizeDigits, categorySummary} from './domain.js';
 import {openDatabase, createRepository, friendlyError, DB_VERSION} from './db.js';
 import {BUILD, BUILD_NOTE} from './build-info.js';
@@ -14,18 +15,20 @@ let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, ini
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date'].map(id => $(id).value));
 const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : page === 'category-edit' ? $('category-edit-name').value !== categoryInitial : false;
-const safeToUpdate = () => !busy && !dirty() && !$('leave-dialog').open && !$('category-action-dialog').open && !$('record-delete-dialog').open && $('category-popup').hidden;
+const safeToUpdate = () => !pendingBackup && !busy && !dirty() && !$('leave-dialog').open && !$('category-action-dialog').open && !$('record-delete-dialog').open && $('category-popup').hidden;
 function notify(text) { $('message').textContent = text; $('message').hidden = false; }
 function setBusy(value) { busy = value; if (!value && resetOnReturn) setTimeout(resetSession, 0); $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
 function setError(id, error) { $(id).textContent = friendlyError(error); $(id).hidden = false; }
 function show(next) {
   if (resetOnReturn) next = 'home';
+  if (page === 'backup' && next !== 'backup') clearBackupPreview();
   page = next; closeCombo();
-  for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics', 'summary', 'summary-detail', 'more', 'definitions']) $(p + '-page').hidden = p !== next;
+  for (const p of ['home', 'entry', 'categories', 'category-edit', 'diagnostics', 'summary', 'summary-detail', 'more', 'definitions', 'backup']) $(p + '-page').hidden = p !== next;
   $('navigation').hidden = next === 'entry'; $('page-content').scrollTop = 0; $('message').hidden = true;
-  const activeTab = ['categories','category-edit','definitions','diagnostics'].includes(next) ? 'more' : next === 'summary-detail' ? 'summary' : next;
+  const activeTab = ['categories','category-edit','definitions','diagnostics','backup'].includes(next) ? 'more' : next === 'summary-detail' ? 'summary' : next;
   all('#navigation [data-page]').forEach(b => { if (b.dataset.page === activeTab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (next === 'home') renderHome();
+  if (next === 'backup') refreshRecovery();
   if (next === 'summary') renderSummary();
   if (next === 'categories') renderCategories();
   if (next === 'diagnostics') updateDiagnostics();
@@ -371,3 +374,49 @@ function openSummaryDetail(group,month,type){
 $('summary-month').onchange=renderSummary;
 
 $('entry-date').addEventListener('click',()=>{try{$('entry-date').showPicker?.();}catch{/* Native picker remains available. */}});
+
+let pendingBackup = null, backupReadToken = 0;
+function clearBackupPreview() {
+  backupReadToken++; pendingBackup=null; $('backup-preview').hidden=true;
+  $('backup-file').value=''; $('backup-consent').checked=false; $('backup-restore').disabled=true;
+}
+async function refreshRecovery() {
+  try { $('backup-recovery').hidden=!(await repository.readRecovery()); } catch(error) { notify(friendlyError(error)); }
+}
+function downloadBackup(backup, prefix='masareek') {
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob), link=document.createElement('a');
+  link.href=url; link.download=`${prefix}-${new Date().toISOString().replace(/[:.]/g,'-')}.json`;
+  document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+$('backup-export').onclick=async()=>{
+  if(busy)return;
+  try { downloadBackup(createBackup(await repository.readAll())); $('backup-status').textContent='تم تجهيز الملف. تأكد من حفظه في تطبيق الملفات (Files).'; }
+  catch(error){$('backup-status').textContent=friendlyError(error);}
+};
+$('backup-recovery').onclick=async()=>{
+  try { const backup=await repository.readRecovery(); if(backup)downloadBackup(backup,'masareek-before-restore'); }
+  catch(error){$('backup-status').textContent=friendlyError(error);}
+};
+$('backup-file').onchange=async()=>{
+  const file=$('backup-file').files[0]; clearBackupPreview(); const token=backupReadToken;
+  if(!file)return;
+  try {
+    if(file.size>20000000)throw new Error('حجم الملف يتجاوز 20 MB.');
+    const backup=parseBackup(await file.text());
+    if(token!==backupReadToken)return;
+    resetOnReturn=false; show('backup'); pendingBackup=backup;
+    $('backup-status').textContent='تم فحص الملف. لم تتغير البيانات بعد.';
+    $('backup-details').textContent=`التصنيفات: ${backup.categories.length} · الحركات: ${backup.records.length} · تاريخ النسخة: ${backup.exportedAt.slice(0,10)}`;
+    $('backup-preview').hidden=false;
+  }catch(error){$('backup-status').textContent=friendlyError(error);}
+};
+$('backup-consent').onchange=()=>{$('backup-restore').disabled=!$('backup-consent').checked;};
+$('backup-cancel').onclick=()=>{clearBackupPreview();$('backup-status').textContent='أُلغيت الاستعادة؛ لم تتغير البيانات.';};
+$('backup-restore').onclick=async()=>{
+  if(busy||!pendingBackup||!$('backup-consent').checked)return;
+  setBusy(true); $('backup-restore').disabled=true; $('backup-cancel').disabled=true; $('backup-file').disabled=true;
+  try { data=await repository.restoreBackup(pendingBackup);clearBackupPreview();show('home');notify('تمت الاستعادة بنجاح. نسخة الأمان السابقة متاحة في النسخ الاحتياطي.'); }
+  catch(error){$('backup-status').textContent=friendlyError(error);}
+  finally{setBusy(false);$('backup-restore').disabled=!pendingBackup||!$('backup-consent').checked;$('backup-cancel').disabled=false;$('backup-file').disabled=false;}
+};

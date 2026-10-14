@@ -1,2 +1,2 @@
-export const BUILD = 'B10';
-export const BUILD_NOTE = 'ملخص الشهر والمزيد';
+export const BUILD = 'B11';
+export const BUILD_NOTE = 'النسخ الاحتياطي والاستعادة';

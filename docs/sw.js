@@ -1,5 +1,5 @@
-const BUILD = 'B10';
-const ASSETS = ["css/app.css","fixtures/t08.html","icons/apple-touch.png","icons/icon-192.png","icons/icon-512.png","index.html","js/app.js","js/build-info.js","js/db.js","js/domain.js","js/offline.js","manifest.webmanifest"];
+const BUILD = 'B11';
+const ASSETS = ["css/app.css","fixtures/t08.html","icons/apple-touch.png","icons/icon-192.png","icons/icon-512.png","index.html","js/app.js","js/backup.js","js/build-info.js","js/db.js","js/domain.js","js/offline.js","manifest.webmanifest"];
 const PREFIX = `masareek-spike:${self.registration.scope}:assets:`;
 const CACHE = PREFIX + BUILD;
 const assetURLs = ASSETS.map(path => new URL(path, self.registration.scope).href);

@@ -11,7 +11,7 @@
 <body>
 <main id="app">
  <header class="brand-row"><span class="brand">مصاريك<span class="brand-dot">.</span></span><span class="tag">نسخة تجريبية</span></header>
- <p class="notice">لبيانات الاختبار فقط · النسخ الاحتياطي لم يُنفّذ بعد</p>
+ <p class="notice">نسخة تجريبية · بياناتك محفوظة على هذا الجهاز</p>
  <p id="isolated-label" class="notice" hidden>اختبار T08 · قاعدة معزولة عن بقية التجربة</p>
  <p id="startup" role="status">جارٍ فتح البيانات…</p>
  <div id="workspace" hidden>
@@ -44,7 +44,18 @@
   <details id="income-breakdown-section"><summary>مصادر الإيرادات</summary><p class="help">النسبة من إجمالي الإيرادات.</p><div id="income-breakdown"></div></details><p class="help">النسب مقربة لأقرب 0.1%.</p>
  </section>
  <section id="summary-detail-page" hidden><div class="section-heading"><h1 id="summary-detail-title"></h1><button type="button" data-back="summary">رجوع</button></div><p id="summary-detail-meta" class="help"></p><div id="summary-detail-list"></div></section>
- <section id="more-page" hidden><h1>المزيد</h1><div class="menu-list"><button type="button" data-page="definitions">التعريفات <span>‹</span></button><button type="button" data-page="diagnostics">فحص التجربة <span>‹</span></button></div></section>
+ <section id="backup-page" hidden>
+  <button type="button" data-back="more">‹ المزيد</button><h1>النسخ الاحتياطي</h1>
+  <p>احفظ ملفًا يحتوي على جميع الأشهر والحركات والتصنيفات، بما فيها التصنيفات المعطّلة. احفظه في مكان تختاره خارج التطبيق.</p>
+  <div class="button-stack"><button id="backup-export" type="button" class="primary">تصدير نسخة احتياطية</button>
+  <label for="backup-file">استعادة من ملف</label><input id="backup-file" type="file" accept=".json,application/json">
+  <button id="backup-recovery" type="button" hidden>تصدير نسخة الأمان السابقة للاستعادة</button></div>
+  <p id="backup-status" role="status"></p>
+  <div id="backup-preview" hidden><h2>مراجعة الملف</h2><p id="backup-details"></p><p>الاستعادة تستبدل جميع بيانات الجهاز الحالية بمحتوى الملف، ولا تدمج الحركات. ستُحفظ نسخة أمان محلية من البيانات الحالية قبل الاستبدال.</p>
+  <label><input id="backup-consent" type="checkbox"> أفهم أن بياناتي الحالية ستُستبدل</label>
+  <div class="two-actions"><button id="backup-restore" type="button" class="danger" disabled>استبدال البيانات واستعادة الملف</button><button id="backup-cancel" type="button">إلغاء</button></div></div>
+ </section>
+ <section id="more-page" hidden><h1>المزيد</h1><div class="menu-list"><button type="button" data-page="definitions">التعريفات <span>‹</span></button><button type="button" data-page="backup">النسخ الاحتياطي <span>‹</span></button><button type="button" data-page="diagnostics">فحص التجربة <span>‹</span></button></div></section>
  <section id="definitions-page" hidden><div class="section-heading"><h1>التعريفات</h1><button type="button" data-back="more">رجوع</button></div><div class="menu-list"><button type="button" data-page="categories">التصنيفات <span>مصروفات وإيرادات ‹</span></button></div></section>
  <section id="categories-page" hidden>
   <div class="section-heading"><h1>التصنيفات</h1><button type="button" data-back="definitions">رجوع</button></div><div class="tabs" role="group" aria-label="نوع التصنيف"><button data-category-type="expense" aria-pressed="true" type="button">مصروفات</button><button data-category-type="income" aria-pressed="false" type="button">إيرادات</button></div>
