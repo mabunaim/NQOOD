@@ -1,10 +1,10 @@
 # مصاريك — NQOOD
 
-Personal expense PWA. Current build: **B12 — Separate expense and income summaries**.
+Personal expense PWA. Current build: **V1.0.0 — First personal-use release**.
 
 Application: https://mabunaim.github.io/NQOOD/
 
-This is an incremental test build, not the complete product. Use fictional test data until physical-device backup/restore and full acceptance testing are complete.
+First personal-use release. Data stays on the device. Export backups regularly and before clearing browser data or changing devices. There is no account or cloud synchronization.
 
 ## Development
 
@@ -24,7 +24,7 @@ npm run serve
 GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs B12
+node tools/stage-pages.mjs V1.0.0
 ```
 
 Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
@@ -33,8 +33,9 @@ Keep the same URL and database name when deploying updates. Historical builds re
 
 Income and expense entry, monthly totals, searchable categories, category creation and maintenance, offline storage and controlled updates. Category maintenance preserves linked records when renaming, disabling or reactivating a category. Used categories cannot be deleted.
 
-27 Node tests and 21 Chromium browser tests passed. Physical-device category UAT is pending. Record editing and confirmed deletion are available. Monthly category reports are available. Validated JSON export and atomic replacement restore are available, with a local pre-restore recovery snapshot. iPhone Files export/import UAT is pending.
+27 Node tests and 21 Chromium browser tests passed. Core user acceptance checks have been approved for this personal-use release. Record editing and confirmed deletion are available. Monthly category reports are available. Validated JSON export and atomic replacement restore are available, with a local pre-restore recovery snapshot. Backup export/import has been accepted in user testing.
 
+- [V1.0.0 release](docs/RELEASE_V1.md)
 - [B12 summary layout](docs/RELEASE_B12.md)
 - [B11 backup and restore](docs/RELEASE_B11.md)
 - [B10 summary, navigation and calendar](docs/RELEASE_B10.md)

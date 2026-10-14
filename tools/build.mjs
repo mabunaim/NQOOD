@@ -11,14 +11,14 @@ async function walk(dir, prefix = '') {
   }
   return result.sort();
 }
-for (const build of ['B12']) {
+for (const build of ['V1.0.0']) {
   const output = path.join(root, 'dist-' + build.toLowerCase());
   const files = (await walk(path.join(root,'src'))).filter(file => file !== 'sw-template.js');
   for (const file of files) { await mkdir(path.dirname(path.join(output, file)), {recursive:true}); await copyFile(path.join(root,'src',file), path.join(output,file)); }
-  await writeFile(path.join(output,'js/build-info.js'), `export const BUILD = '${build}';\nexport const BUILD_NOTE = '${'ملخص أوضح للمصروفات والإيرادات'}';\n`);
+  await writeFile(path.join(output,'js/build-info.js'), `export const BUILD = '${build}';\nexport const BUILD_NOTE = '${'الإصدار الأول'}';\n`);
   const html = await readFile(path.join(output,'index.html'),'utf8');
   await mkdir(path.join(output,'fixtures'),{recursive:true});
-  await writeFile(path.join(output,'fixtures/t08.html'),html.replace('<head>','<head>\n<base href="../">').replace('<title>مصاريك — تجربة الحفظ</title>','<title>مصاريك — فشل الحفظ T08</title>'));
+  await writeFile(path.join(output,'fixtures/t08.html'),html.replace('<head>','<head>\n<base href="../">').replace('<title>مصاريك</title>','<title>مصاريك — فشل الحفظ T08</title>'));
   const assets = [...files, 'fixtures/t08.html'].sort();
   const template = await readFile(path.join(root,'src/sw-template.js'),'utf8');
   await writeFile(path.join(output,'sw.js'),template.replaceAll('__BUILD__',build).replace('__ASSETS__',JSON.stringify(assets)));

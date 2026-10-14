@@ -276,7 +276,7 @@ async function init() {
   try {
     repository = createRepository(await openDatabase(dbName), {testMode}); data = await repository.readAll();
     $('startup').hidden = true; $('workspace').hidden = false;
-    $('isolated-label').hidden = !testMode; $('arm-failure').hidden = !testMode; $('t08-link').hidden = testMode; $('normal-link').hidden = !testMode;
+    $('isolated-label').hidden = !testMode; $('arm-failure').hidden = !testMode; $('t08-link').hidden = true; $('normal-link').hidden = !testMode;
     show('home');
     setupOffline({safeToUpdate, onWaiting: waiting => { $('update-banner').hidden = !waiting; }, onChanged: () => { if (page === 'diagnostics') updateDiagnostics(); }})
       .then(value => { offline = value; if (page === 'diagnostics') updateDiagnostics(); })

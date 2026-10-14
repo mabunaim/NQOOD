@@ -1,2 +1,2 @@
-export const BUILD = 'B12';
-export const BUILD_NOTE = 'ملخص أوضح للمصروفات والإيرادات';
+export const BUILD = 'V1.0.0';
+export const BUILD_NOTE = 'الإصدار الأول';
