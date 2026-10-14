@@ -11,11 +11,11 @@ async function walk(dir, prefix = '') {
   }
   return result.sort();
 }
-for (const build of ['V1.0.0']) {
+for (const build of ['V1.0.1']) {
   const output = path.join(root, 'dist-' + build.toLowerCase());
   const files = (await walk(path.join(root,'src'))).filter(file => file !== 'sw-template.js');
   for (const file of files) { await mkdir(path.dirname(path.join(output, file)), {recursive:true}); await copyFile(path.join(root,'src',file), path.join(output,file)); }
-  await writeFile(path.join(output,'js/build-info.js'), `export const BUILD = '${build}';\nexport const BUILD_NOTE = '${'الإصدار الأول'}';\n`);
+  await writeFile(path.join(output,'js/build-info.js'), `export const BUILD = '${build}';\nexport const BUILD_NOTE = '${'مسح البيانات والبدء من جديد'}';\n`);
   const html = await readFile(path.join(output,'index.html'),'utf8');
   await mkdir(path.join(output,'fixtures'),{recursive:true});
   await writeFile(path.join(output,'fixtures/t08.html'),html.replace('<head>','<head>\n<base href="../">').replace('<title>مصاريك</title>','<title>مصاريك — فشل الحفظ T08</title>'));

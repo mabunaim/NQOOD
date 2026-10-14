@@ -16,7 +16,7 @@ let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, ini
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date'].map(id => $(id).value));
 const dirty = () => page === 'entry' ? snapshot() !== initial : page === 'categories' ? $('category-name').value !== '' : page === 'category-edit' ? $('category-edit-name').value !== categoryInitial : false;
-const safeToUpdate = () => !pendingBackup && !busy && !dirty() && !$('leave-dialog').open && !$('category-action-dialog').open && !$('record-delete-dialog').open && $('category-popup').hidden;
+const safeToUpdate = () => !$('clear-data-dialog').open && !pendingBackup && !busy && !dirty() && !$('leave-dialog').open && !$('category-action-dialog').open && !$('record-delete-dialog').open && $('category-popup').hidden;
 function notify(text) { $('message').textContent = text; $('message').hidden = false; }
 function setBusy(value) { busy = value; if (!value && resetOnReturn) setTimeout(resetSession, 0); $('entry-fields').disabled = value; $('category-save').disabled = value; $('category-name').disabled = value; $('category-edit-fields').disabled = value; $('category-toggle').disabled = value; $('category-delete').disabled = value; }
 function setError(id, error) { $(id).textContent = friendlyError(error); $(id).hidden = false; }
@@ -431,4 +431,19 @@ $('backup-restore').onclick=async()=>{
   try { data=await repository.restoreBackup(pendingBackup);clearBackupPreview();show('home');notify('تمت الاستعادة بنجاح. نسخة الأمان السابقة متاحة في النسخ الاحتياطي.'); }
   catch(error){$('backup-status').textContent=friendlyError(error);}
   finally{setBusy(false);$('backup-restore').disabled=!pendingBackup||!$('backup-consent').checked;$('backup-cancel').disabled=false;$('backup-file').disabled=false;}
+};
+
+$('clear-data-open').onclick=()=>guard(()=>{$('clear-data-error').hidden=true;$('clear-data-dialog').showModal();$('clear-data-cancel').focus();});
+$('clear-data-cancel').onclick=()=>{if(!busy)$('clear-data-dialog').close();};
+$('clear-data-dialog').addEventListener('cancel',event=>{if(busy)event.preventDefault();});
+$('clear-data-confirm').onclick=async()=>{
+  if(busy)return;
+  setBusy(true);$('clear-data-confirm').disabled=true;$('clear-data-cancel').disabled=true;
+  try{
+    data=await repository.clearAllData();clearBackupPreview();$('clear-data-dialog').close();
+    $('month').replaceChildren();$('summary-month').replaceChildren();summaryType='expense';
+    $('backup-status').textContent='';$('backup-recovery').hidden=true;$('summary-detail-list').replaceChildren();
+    setBusy(false);resetSession();notify('تم مسح جميع البيانات. يمكنك الآن البدء بإدخال بياناتك الجديدة.');
+  }catch(error){setError('clear-data-error',error);}
+  finally{setBusy(false);$('clear-data-confirm').disabled=false;$('clear-data-cancel').disabled=false;}
 };

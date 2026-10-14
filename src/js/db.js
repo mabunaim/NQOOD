@@ -140,6 +140,15 @@ export function createRepository(db, {testMode = false} = {}) {
         };
       });
     },
+    async clearAllData() {
+      return atomic(db, ['categories', 'transactions', 'meta'], 'readwrite', (tx, done, abort) => {
+        for (const name of ['categories', 'transactions', 'meta']) tx.objectStore(name).clear();
+        tx.objectStore('meta').put({key:'schemaVersion',value:DB_VERSION}).onsuccess = () => {
+          if (testMode && abortNext) { abortNext=false; abort(new Error('T08: تعذر المسح؛ بقيت البيانات كما هي.')); }
+          else done({categories:[],records:[]});
+        };
+      });
+    },
     async readRecovery() {
       return atomic(db, ['meta'], 'readonly', (tx, done) => {
         tx.objectStore('meta').get('beforeRestore').onsuccess = event => done(event.target.result?.value || null);
