@@ -41,8 +41,9 @@
  <section id="summary-page" hidden>
   <h1>ملخص الشهر</h1><div class="month-row"><label for="summary-month">الشهر</label><select id="summary-month"></select></div>
   <div class="summary-totals"><div><span class="small muted">الإيرادات</span><bdi id="summary-income" class="num value">0</bdi></div><div><span class="small muted">المصروفات</span><bdi id="summary-expense" class="num value">0</bdi></div><div><span class="small muted">المتبقي</span><bdi id="summary-remaining" class="num value">0</bdi></div></div>
-  <div class="section-heading"><h2>وين صرفت مصاريك؟</h2></div><p class="help">اضغط التصنيف لعرض حركاته. النسبة من إجمالي المصروفات.</p><div id="expense-breakdown"></div>
-  <details id="income-breakdown-section"><summary>مصادر الإيرادات</summary><p class="help">النسبة من إجمالي الإيرادات.</p><div id="income-breakdown"></div></details><p class="help">النسب مقربة لأقرب 0.1%.</p>
+  <div class="summary-switcher"><div class="tabs" role="group" aria-label="نوع الملخص"><button id="summary-tab-expense" type="button" data-summary-type="expense" aria-pressed="true" aria-controls="expense-panel">المصروفات</button><button id="summary-tab-income" type="button" data-summary-type="income" aria-pressed="false" aria-controls="income-panel">الإيرادات</button></div></div>
+  <section id="expense-panel" aria-labelledby="summary-tab-expense"><div class="section-heading"><h2>وين صرفت مصاريك؟</h2><span id="expense-category-count" class="small muted"></span></div><p class="help">ملخص حسب التصنيف · اضغط التصنيف لعرض حركاته.</p><div id="expense-breakdown"></div><p class="help">النسبة من إجمالي المصروفات، مقربة لأقرب 0.1%.</p></section>
+  <section id="income-panel" aria-labelledby="summary-tab-income" hidden><div class="section-heading"><h2>من وين إجتك المصاري؟</h2><span id="income-category-count" class="small muted"></span></div><p class="help">ملخص حسب المصدر · اضغط التصنيف لعرض حركاته.</p><div id="income-breakdown"></div><p class="help">النسبة من إجمالي الإيرادات، مقربة لأقرب 0.1%.</p></section>
  </section>
  <section id="summary-detail-page" hidden><div class="section-heading"><h1 id="summary-detail-title"></h1><button type="button" data-back="summary">رجوع</button></div><p id="summary-detail-meta" class="help"></p><div id="summary-detail-list"></div></section>
  <section id="backup-page" hidden>

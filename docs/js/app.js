@@ -11,6 +11,7 @@ const dbName = `${testMode ? 'masareek_spike_t08' : 'masareek_spike_db'}:${baseP
 let resetOnReturn = false, editingRecord = null, deleteRecordId = null, comboIndex = -1;
 let editingCategoryId = '', categoryInitial = '', categoryAction = null;
 let repository, offline, offlineError = '', data = {categories: [], records: []};
+let summaryType = 'expense';
 let page = 'home', entryType = 'expense', categoryType = 'expense', entryId, initial = '', pendingAction = null, busy = false;
 const e = (tag, className = '', text) => { const node = document.createElement(tag); node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const snapshot = () => JSON.stringify(['entry-category', 'entry-amount', 'entry-description', 'entry-date'].map(id => $(id).value));
@@ -348,12 +349,23 @@ function summaryMonths() {
   }
   $('summary-month').value=selected;
 }
+function selectSummaryType(type, resetScroll = false) {
+  summaryType=type;
+  for(const item of ['expense','income']) {
+    $(item+'-panel').hidden=item!==type;
+    $('summary-tab-'+item).setAttribute('aria-pressed',String(item===type));
+  }
+  if(resetScroll)$('page-content').scrollTop=0;
+}
+all('[data-summary-type]').forEach(button=>button.onclick=()=>selectSummaryType(button.dataset.summaryType,true));
 function renderSummary() {
+  selectSummaryType(summaryType);
   summaryMonths();const month=$('summary-month').value, totals=monthlyTotals(data.records,month);
   for(const key of ['income','expense','remaining'])$('summary-'+key).textContent=formatMoney(totals[key]);
   $('summary-remaining').classList.toggle('danger',totals.remaining<0n);
   for(const type of ['expense','income']){
     const target=$(type+'-breakdown');target.replaceChildren();const groups=categorySummary(data.records,data.categories,month,type);
+    $(type+'-category-count').textContent=`${groups.length} تصنيفات`;
     if(!groups.length){target.append(e('p','empty',type==='expense'?'لا توجد مصروفات لهذا الشهر.':'لا توجد إيرادات لهذا الشهر.'));continue;}
     for(const group of groups){
       const button=e('button','breakdown-row');button.type='button';button.dataset.categoryId=group.id;

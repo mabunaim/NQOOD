@@ -1,6 +1,6 @@
 # مصاريك — NQOOD
 
-Personal expense PWA. Current build: **B11 — Backup and restore**.
+Personal expense PWA. Current build: **B12 — Separate expense and income summaries**.
 
 Application: https://mabunaim.github.io/NQOOD/
 
@@ -24,7 +24,7 @@ npm run serve
 GitHub Pages publishes from **main /docs**. To stage the current build:
 
 ```sh
-node tools/stage-pages.mjs B11
+node tools/stage-pages.mjs B12
 ```
 
 Keep the same URL and database name when deploying updates. Historical builds remain available for update regression testing.
@@ -33,8 +33,9 @@ Keep the same URL and database name when deploying updates. Historical builds re
 
 Income and expense entry, monthly totals, searchable categories, category creation and maintenance, offline storage and controlled updates. Category maintenance preserves linked records when renaming, disabling or reactivating a category. Used categories cannot be deleted.
 
-27 Node tests and 20 Chromium browser tests passed. Physical-device category UAT is pending. Record editing and confirmed deletion are available. Monthly category reports are available. Validated JSON export and atomic replacement restore are available, with a local pre-restore recovery snapshot. iPhone Files export/import UAT is pending.
+27 Node tests and 21 Chromium browser tests passed. Physical-device category UAT is pending. Record editing and confirmed deletion are available. Monthly category reports are available. Validated JSON export and atomic replacement restore are available, with a local pre-restore recovery snapshot. iPhone Files export/import UAT is pending.
 
+- [B12 summary layout](docs/RELEASE_B12.md)
 - [B11 backup and restore](docs/RELEASE_B11.md)
 - [B10 summary, navigation and calendar](docs/RELEASE_B10.md)
 - [B9 entry layout and swipe adjustment](docs/RELEASE_B9.md)

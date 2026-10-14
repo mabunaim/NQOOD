@@ -1,2 +1,2 @@
-export const BUILD = 'B11';
-export const BUILD_NOTE = 'النسخ الاحتياطي والاستعادة';
+export const BUILD = 'B12';
+export const BUILD_NOTE = 'ملخص أوضح للمصروفات والإيرادات';
